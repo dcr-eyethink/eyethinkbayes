@@ -63,8 +63,25 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-Runs bayesian mixed models, bayes ttests and some bayes factors. Outputs results to text files and plots
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="readme-eyethink-bayes">README eyethink bayes<a class="anchor" aria-label="anchor" href="#readme-eyethink-bayes"></a>
+</h1></div>
+<p>2024-01-23</p>
+<div class="section level2">
+<h2 id="eyethink-bayes-analysis-tools">Eyethink Bayes analysis tools<a class="anchor" aria-label="anchor" href="#eyethink-bayes-analysis-tools"></a>
+</h2>
+<p>This is a toolbox for running Bayesian mixed models. It is part of the eyethink toolbox and requires the <a href="https://dcr-eyethink.github.io/eyethinkdata/" class="external-link">eyethinkdata package</a>.</p>
+<p>It will run a Baysian mixed model using rstanarm, output metrics and plots for the main effects and interactions.</p>
+<p>Use the code below to install or update from github</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"dcr-eyethink/eyethinkbayes"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dcr-eyethink/eyethinkbayes" class="external-link">eyethinkbayes</a></span><span class="op">)</span></span></code></pre></div>
+<p>There is a vignette walk through using the package and some of its functions. You can access this in R with</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"eyethinkbayes_vignette"</span>,package <span class="op">=</span> <span class="st">"eyethinkbayes"</span><span class="op">)</span></span></code></pre></div>
+<p>You can also read this vignette <a href="https://dcr-eyethink.github.io/eyethinkbayes/articles/eyethinkbayes_vignette.html">online at the github website</a>.</p>
+</div>
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
