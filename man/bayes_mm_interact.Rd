@@ -13,16 +13,17 @@ bayes_mm_interact(
   ribbon = T,
   ladder = F,
   spark = F,
-  slopes = T,
+  slope_mpes = T,
   mfx_sideplot = F,
   ylim = NULL,
+  contrast_sparkline = F,
   ...
 )
 }
 \arguments{
 \item{bmm}{needs a bayes mixed model object (or a list with one at start)}
 
-\item{interacts}{interactions you want to plot with : separating, gives all if void}
+\item{interacts}{interactions you want to plot with : separating, gives all if void. Remember that punctuation gets stripped from condition names}
 
 \item{pred_values}{for continuous variables, a vector of values where predictions are made. Defaults to 10 equally spaced steps}
 

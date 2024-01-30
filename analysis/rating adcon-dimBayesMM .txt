@@ -1,0 +1,138 @@
+Bayes Mixed model on  rating  by  adcon dim  nested in  pid
+================================================================================
+
+stan_glmer
+ family:       gaussian [identity]
+ formula:      rating ~ adcon * dim + (1 | pid)
+ observations: 804
+------
+                           Median MAD_SD
+(Intercept)                 1.3    0.3  
+adconnon-address           -0.5    0.4  
+dimcruise                   0.7    0.4  
+dimdog                      0.2    0.4  
+dimgames                    0.9    0.4  
+adconnon-address:dimcruise -1.0    0.6  
+adconnon-address:dimdog    -0.8    0.6  
+adconnon-address:dimgames  -3.2    0.6  
+
+Auxiliary parameter(s):
+      Median MAD_SD
+sigma 2.7    0.1   
+
+Error terms:
+ Groups   Name        Std.Dev.
+ pid      (Intercept) 2.0     
+ Residual             2.7     
+Num. levels: pid 201 
+
+------
+* For help interpreting the printed output see ?print.stanreg
+* For info on the priors used see ?prior_summary.stanreg
+
+Priors for model 'bmm' 
+------
+Intercept (after predictors centered)
+  Specified prior:
+    ~ normal(location = 0.89, scale = 2.5)
+  Adjusted prior:
+    ~ normal(location = 0.89, scale = 8.7)
+
+Coefficients
+  Specified prior:
+    ~ normal(location = [0,0,0,...], scale = [2.5,2.5,2.5,...])
+  Adjusted prior:
+    ~ normal(location = [0,0,0,...], scale = [17.44,20.14,20.14,...])
+
+Auxiliary (sigma)
+  Specified prior:
+    ~ exponential(rate = 1)
+  Adjusted prior:
+    ~ exponential(rate = 0.29)
+
+Covariance
+ ~ decov(reg. = 1, conc. = 1, shape = 1, scale = 1)
+------
+See help('prior_summary.stanreg') for more details
+
+Parameter                  | Median |         95% CI |     pd | % in ROPE |  Rhat |     ESS |                  Prior
+--------------------------------------------------------------------------------------------------------------------
+(Intercept)                |   1.32 | [ 0.71,  1.93] |   100% |        0% | 0.999 | 2630.00 |  Normal (0.89 +- 8.73)
+adconnon-address           |  -0.51 | [-1.34,  0.30] | 88.72% |    34.34% | 0.999 | 2477.00 | Normal (0.00 +- 17.44)
+dimcruise                  |   0.70 | [-0.11,  1.47] | 95.45% |    18.13% | 1.000 | 3657.00 | Normal (0.00 +- 20.14)
+dimdog                     |   0.19 | [-0.60,  0.99] | 67.97% |    59.13% | 0.999 | 3330.00 | Normal (0.00 +- 20.14)
+dimgames                   |   0.92 | [ 0.15,  1.74] | 98.98% |     4.97% | 1.000 | 3215.00 | Normal (0.00 +- 20.14)
+adconnon-address:dimcruise |  -0.96 | [-2.17,  0.20] | 94.65% |    13.95% | 0.999 | 3161.00 | Normal (0.00 +- 25.78)
+adconnon-address:dimdog    |  -0.77 | [-1.99,  0.41] | 88.90% |    22.82% | 0.999 | 2948.00 | Normal (0.00 +- 25.99)
+adconnon-address:dimgames  |  -3.24 | [-4.48, -2.03] |   100% |        0% | 0.999 | 2853.00 | Normal (0.00 +- 26.54)
+
+Main effects means:  adcon 
+Estimated Marginal Means
+
+adcon       | Mean |        95% CI
+----------------------------------
+addressable | 1.77 | [ 1.37, 2.16]
+non-address | 0.01 | [-0.38, 0.38]
+
+Marginal means estimated at adcon
+
+Main effects contrasts:  adcon 
+Marginal Contrasts Analysis
+
+Level1      |        Level2 | Difference |       95% CI |   pd | % in ROPE
+--------------------------------------------------------------------------
+addressable | (non-address) |       1.76 | [1.39, 2.14] | 100% |        0%
+
+Marginal contrasts estimated at adcon
+
+Main effects means:  dim 
+Estimated Marginal Means
+
+dim    | Mean |        95% CI
+-----------------------------
+car    | 1.07 | [ 0.59, 1.52]
+cruise | 1.27 | [ 0.79, 1.75]
+dog    | 0.87 | [ 0.39, 1.32]
+games  | 0.36 | [-0.10, 0.83]
+
+Marginal means estimated at dim
+
+Main effects contrasts:  dim 
+Marginal Contrasts Analysis
+
+Level1 | Level2 | Difference |        95% CI |     pd | % in ROPE
+-----------------------------------------------------------------
+car    | cruise |      -0.21 | [-0.73, 0.34] | 77.58% |    21.74%
+car    |    dog |       0.19 | [-0.33, 0.72] | 76.25% |    23.16%
+car    |  games |       0.70 | [ 0.17, 1.23] | 99.67% |        0%
+cruise |    dog |       0.40 | [-0.15, 0.92] | 93.03% |    10.32%
+cruise |  games |       0.91 | [ 0.37, 1.45] | 99.92% |        0%
+dog    |  games |       0.51 | [-0.01, 1.03] | 97.17% |     4.37%
+
+Marginal contrasts estimated at dim
+
+Interactions: means of levels of   adcon  within levels of  dimEstimated Marginal Means
+
+adcon       |    dim |  Mean |         95% CI
+---------------------------------------------
+addressable |    car |  1.32 | [ 0.71,  1.93]
+non-address |    car |  0.80 | [ 0.16,  1.43]
+addressable | cruise |  2.01 | [ 1.35,  2.66]
+non-address | cruise |  0.53 | [-0.10,  1.16]
+addressable |    dog |  1.51 | [ 0.86,  2.16]
+non-address |    dog |  0.22 | [-0.39,  0.81]
+addressable |  games |  2.25 | [ 1.62,  2.87]
+non-address |  games | -1.53 | [-2.14, -0.90]
+
+Marginal means estimated at adcon, dim
+Interations: contrasts between levels of   adcon  within levels of  dimMarginal Contrasts Analysis
+
+Level1      |        Level2 |    dim | Difference |        95% CI |     pd | % in ROPE
+--------------------------------------------------------------------------------------
+addressable | (non-address) |    car |       0.51 | [-0.30, 1.34] | 88.72% |     9.42%
+addressable | (non-address) | cruise |       1.48 | [ 0.67, 2.33] | 99.85% |        0%
+addressable | (non-address) |    dog |       1.29 | [ 0.47, 2.09] | 99.88% |        0%
+addressable | (non-address) |  games |       3.77 | [ 2.94, 4.62] |   100% |        0%
+
+Marginal contrasts estimated at adcon$`adcon:dim`
+

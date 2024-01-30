@@ -2,13 +2,13 @@ bayes_mm <- function(bmm=list(),outp="analysis",title=NULL,plotcheck=F,...){
   #' Wrapper function for a bayesian mixed model, analysis and plots
   #' can be given an already generated model, or will run it
   #' with data and specified dvname, conditions and groups
-  #' In ... can pass variables to bayes_mm_mainFX or bayes_mm_interact and pirateye for plotting
+  #' In ... can pass variables to other bayes functions, and pirateye for plotting
   #' @export
   #' @param bmm if not supplied, need model specs in ... if supplied just the analysis will be run
   #' @param outp folder name for output, or NULL to stop
   #' @param plotcheck plots traces to check
   #' @param title for output files and plots
-  #' @param ... parameters for running a new model with \code{\link{bayes_mm_run}}, eg data, dvname, conditions, groups. Or for plotting
+  #' @param ... parameters for running a new model with \code{\link{bayes_mm_run}}, eg data, dvname, conditions, groups. Or for plotting with pirateye. Can also model with explore_browser=T
   #' @export
 
   ## if we don't have the model yet run it
@@ -36,7 +36,7 @@ bayes_mm <- function(bmm=list(),outp="analysis",title=NULL,plotcheck=F,...){
   ## analyse and plot all main effects
   cat("\n")
   param <- parameters::model_parameters(bmm)
-  clipr::write_clip(param)
+  # clipr::write_clip(param)
   print(param)
 
   ## main effects, all of them

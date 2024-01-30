@@ -1,14 +1,13 @@
-bayes_mm_mainFX <- function(bmm,mainfxs=NULL,binom=F,xlabpos=1.1,title=NULL,
-                            mainFXcomposite=T,denplot=F,pirate_diffplot=F,...){
+bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...){
   #' output plot and means table for main effects. Can be passed plotting variables for pirateye
   #' @param mainfxs vector of all main effect conditions to be plotted, defaults to all
   #' @param bmm needs a bayes mixed model stanreg object (or a list with one at start)
-  #' @param mainFXcomposite make a composite pirate plot of all main effects
-  #' @param denplot also give a density plot of individual main effects
-  #' @param pirate_diffplot give a pirate difference plot for individual main effects
+  #' @param title additional text for the title
   #' @export
 
   if (names(bmm[1])=="bmm"){bmm <- bmm$bmm}
+
+  binom <- ifelse ( family(bmm)$family=="binomial",T,F)
 
   if(is.null(mainfxs)){mainfxs <- insight::find_terms(bmm)$conditional}
 
@@ -31,17 +30,19 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,binom=F,xlabpos=1.1,title=NULL,
     #means tables
 
     means <- suppressWarnings(modelbased::estimate_means(model = bmm,at=cond))
-    cat("\nMain effects means: ", cond)
+    cat("\nMain effects means: ", cond,"\n")
     print(means)
     setDT(means)
-    #clipr::write_clip(means)
+    cat("\n")
+
 
     if (is.factor(data[[cond]])) {
+##########################################
       # we have a factor variable
-
+##########################################
       cons <- modelbased::estimate_contrasts(model = bmm,contrast = cond)
 
-      cat("\nMain effects contrasts: ", cond)
+      cat("\nMain effects contrasts: ", cond,"\n")
       print(cons)
       cat("\n")
 
@@ -66,31 +67,28 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,binom=F,xlabpos=1.1,title=NULL,
       ## if there are only 2 levels, then we can gather mpes to put on a plot
       if (length(unique(data[[cond]]))<3){
         mpe <- rbind(mpe,data.frame(condition=cond,
-                                    mpes=scales::percent(cons$pd)))}
+                                    mpes=scales::percent(cons$pd)))
+
+        }
 
 
       ## gather the observed data to plot
       obsdata <- rbind(obsdata,data.frame(data[[dvname]],
                                           condition=cond,levels=data[[cond]]))
 
-      # optional den plot
-      if(denplot){
-        other_plots$density <- bayes_plot(data=data,dvname = dvname,cond = cond,bfpost = bfpost,
-                                          t = paste("DenplotMFX_",cond),...)    }
-
-      # optional pirate_diffplot
-      if(pirate_diffplot){
-        other_plots$pirate_diff <-bayes_pirate_denplot(data=data,dvname = dvname,cond = cond,bfpost = bfpost,
-                                                       t = paste("PirateplotMFX_",cond),...)    }
 
     }else{
-      # we have a continuous variable so make a separate plot
+      ##########################################
+      # we have a continuous variable
+      ##########################################
+
+      # make a separate plot
       setnames(means,"Mean",dvname)
       slopes <- data.table(modelbased::estimate_slopes(bmm, trend = cond))
       slopes$lab <- scales::percent(slopes$pd)
       slopes <- cbind(means[.N,1:2],slopes)
 
-      cont_plots[[cond]] <- do.call(pirateye,resolve.args(...,data=data,
+      cont_plots[[cond]] <- do.call(pirateye,resolve.args(data=data,...,
                                                           pred_means =means,xlabs =slopes,pred_line = T,
                                                           dv=dvname,x_condition=cond,
                                                           line=F,violin=F,dots=T,w=4,
@@ -101,36 +99,59 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,binom=F,xlabpos=1.1,title=NULL,
 
   }
 
+# we've gone through all the mfxs, and have a compiled data set of factor data to plot together
+# and maybe a continuous plot too
 
   if (dim(obsdata)[1]>0){
     # we have at least some main effects factor data
 
     # make a composite plot
     # label variables separately
-    post[,levels:=unlist(strsplit(as.character(variable),split = " "))[2],by=variable]
+    setDT(post)
+    #post[,levels:=unlist(strsplit(as.character(variable),split = " "))[2],by=variable]
+    #
+    post[,levels:=tstrsplit(variable,split=" ")[2],by=variable]
+
     post$variable <- NULL
+
+    post$condition <- as.factor( post$condition)
+    post$levels <- as.factor( post$levels)
+    obsdata$condition <- as.factor( obsdata$condition)
+    obsdata$levels <- as.factor( obsdata$levels)
+
     colnames(obsdata)[1] <- dvname
     setnames(m,"mean",dvname)
 
-    mpe$lab <- mpe$mpes
 
-    if (mainFXcomposite){
+    if (dim(mpe)[1]==0){mpe <- NULL}else{mpe$lab <- mpe$mpes}
 
 
-      # this makes sure that if duplicate arguments are passed via ...
-      # those listed first will be used
-      # eg there might be a data argument that was used when generating a model
 
-      plot_mainfx <- do.call(pirateye,resolve.args(...,data = obsdata, colour_condition = "levels",xlabs = mpe,
+      plot_mainfx <- do.call(pirateye,resolve.args(data = obsdata, colour_condition = "levels",
                                                    pred = post,pred_means = m,facet_condition = "condition",
                                                    facet_scales="free_x",
-                                                   dv = dvname,dots=F,error_bars = F,
+                                                   dv = dvname,
+                                                   ...,
+                                                   dots=F,error_bars = F,xlabs = mpe,
                                                    title=paste(dvname,paste0(mainfxs,collapse="_"),"MainFX BayesPirate",title),
                                                    title_overide=T,
                                                    combine_plots=cont_plots))
 
+     # do we want a sparkline for the contrasts?
 
-    }}
+      if (contrast_sparkline){
+      # check to see if we have exlcusively 2 level conditions, otherwise this isn't going to work
+      bcplot <-  bayes_contrastsparkline(bcontrasts = bcontrasts)
+      plot_mainfx <-  cowplot::plot_grid(plotlist = list(plot_mainfx,bcplot),ncol = 1,rel_heights = c(6,1),
+                                              align = "v",axis="b")
+      }
+
+  }else{
+      # no further data so return continuous plot alone
+
+    }
+
+### combine  plot_mainfx and cont_plots (if we have them)
 
 
 

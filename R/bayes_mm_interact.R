@@ -1,9 +1,10 @@
 bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=NULL,
-                              ribbon=T,ladder=F,spark=F,slopes=T,mfx_sideplot=F,ylim=NULL,
+                              ribbon=T,ladder=F,spark=F,slope_mpes=T,mfx_sideplot=F,ylim=NULL,
+                              contrast_sparkline=F,
                               ...){
 
   #' Output plot and means table for interactions. Can plot discrete or continuous factors. Can be passed plotting variables for pirateye
-  #' @param interacts interactions you want to plot with : separating, gives all if void
+  #' @param interacts interactions you want to plot with : separating, gives all if void. Remember that punctuation gets stripped from condition names
   #' @param bmm needs a bayes mixed model object (or a list with one at start)
   #' @param pred_values for continuous variables, a vector of values where predictions are made. Defaults to 10 equally spaced steps
   #' @param ribbon shades area where no evidence lines are different
@@ -33,7 +34,12 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
 
     if(!is.null(nv)){
       if (length(nv)>1){return("We have two continuous variables. I can't handle that")}else{
-        #  we have a single continuous variable, get the slopes and plot lines
+
+        ##########################################
+        # we have a continuous variable
+        ##########################################
+
+                #  we have a single continuous variable, get the slopes and plot lines
 
         nv_pred <- nv
         if (!is.null(pred_values)){
@@ -52,7 +58,7 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
 
         print(conslop)
 
-        if (slopes){
+        if (slope_mpes){
           slopes <- data.table(modelbased::estimate_slopes(bmm, trend = nv, at=fv))
           slopes$lab <- scales::percent(slopes$pd)
           slopes <- means[,.SD[.N/2],by=fv][slopes,on=fv]
@@ -114,9 +120,10 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
             conslop[,linecol:=ifelse(pd<.9,"yellow","red")]
 
 
-            spark <- ggplot(conslop,aes_string(x=nv,y="pd",colour="pd",group=1))+
+            #spark <- ggplot(conslop,aes_string(x=nv,y="pd",colour="pd",group=1))+
+            spark <- ggplot(conslop,aes(x=.data[[nv]],y=pd,colour=pd,group=1))+
               geom_hline(yintercept = .9,colour="grey")+
-              geom_line(size=1.5)+facet_wrap(paste(fv[-1],"~.")) #+scale_color_identity()
+              geom_line(linewidth=1.5)+facet_wrap(paste(fv[-1],"~.")) #+scale_color_identity()
 
             spark <- spark+ scale_color_gradientn(colours = c("darkblue","blue","blue", "darkgreen", "green"),
                                                   values = c(0.5,.8,.80001, .9, 1))
@@ -151,9 +158,9 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
             mfx <- bayes_mm_mainFX(bmm,mainfxs =fv  )$data_mainfx$predicted
 
             mfxp <- ggplot(data=mfx,aes(colour=levels,x=ratnorm,fill=levels))+
-              geom_density(size=0,alpha=.4)+
+              geom_density(linewidth=0,alpha=.4)+
               geom_vline(data=mfx[,mean(ratnorm),by=levels],
-                         aes(xintercept=V1,colour=levels),size=2)
+                         aes(xintercept=V1,colour=levels),linewidth=2)
 
 
             mfxp <- mfxp + theme_bw()+xlim(ylim)+coord_flip()+scale_y_reverse()+theme_bw()+
@@ -177,7 +184,11 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
       }
 
     }else{
-      # we have all categorial factors, so get contrasts and plot means
+
+      ##########################################
+      # we have a factor variable
+      ##########################################
+            # we have all categorical factors, so get contrasts and plot means
 
       means <- modelbased::estimate_means(bmm,at =i)
       cat("\nInteractions: means of levels of  ", i[1], " within levels of ",i[-1])
@@ -199,9 +210,26 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
       post <- data.table(as.matrix(emmeans::as.mcmc.emmGrid(bmm_fx)))
       post <- melt(post,measure.vars = colnames(post),value.name = dvname)
 
-      for (v in i){post[,variable:=gsub(variable,pattern = paste0(v," "),replacement = "")]}
-      post[,c(i):=tstrsplit(as.character(variable),split = ", ")]
-      post$variable <- NULL
+      post[,c(i):=tstrsplit(variable,split=" ")[seq(from=2, to=(2*length(i)), by=2)],by=variable]
+
+      ## get contrast post distributions for sparkline
+      bcontrasts <- pairs(bmm_fx)
+      bcontrasts <- data.frame(as.matrix(emmeans::as.mcmc.emmGrid(bcontrasts)))
+      if (binom){bcontrasts <- psych::logistic(bcontrasts)}
+      bcontrasts <- melt.data.table(data.table(bcontrasts),measure.vars = colnames(bcontrasts),
+                                   value.name = "diff_est")
+      bcontrasts[,variable:=gsub(x=variable,pattern="contrast.",replacement=""),by=variable]
+      bcontrasts[,variable:=gsub(x=variable,pattern="...",replacement=".",fixed = T),by=variable]
+
+      if (length(i)==2){
+        bcontrasts[,c("condl1","condl2"):=tstrsplit(variable,split=".",fixed=T)[c(2,4)],by=variable]
+        bcontrasts <- bcontrasts[condl1==condl2]
+        bcontrasts$cond <- bcontrasts$condl1
+      }else{
+        bcontrasts[,c("acondl1","acondl2","bcondl1","bcondl2"):=tstrsplit(variable,split=".",fixed=T)[c(2,5,3,6)],by=variable]
+        bcontrasts <- bcontrasts[acondl1==acondl2 & bcondl1==bcondl2]
+        bcontrasts[,cond:= paste(bcondl1,acondl2),by=.(acondl1,bcondl2)]
+}
 
       xlabs <- NULL
       if (dim(cons)[1]>0){
@@ -209,13 +237,21 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
         xlabs$lab <- xlabs$mpes
       }
 
-      # this makes sure that if duplicate arguments are passed via ...
-      # those listed first will be used
+
 
       p <- do.call(pirateye,resolve.args(data = data.table(bmm$data), plot_condition=i,
-                                         pred = post,pred_means = means,xlabs=xlabs,
+                                         pred = post,pred_means = means,
                                          dv = dvname,dots=F,error_bars=F,line = F,ylim=ylim,
-                                         title=paste("Interact BayesPirate",title),...,splitV = T  ))
+                                         title=paste("Interact BayesPirate",title),...,splitV = T,xlabs=xlabs  ))
+
+      if (contrast_sparkline){
+        # ? check to see if we have exclusively 2 level conditions, otherwise this isn't going to work
+        bcplot <-  bayes_contrastsparkline(bcontrasts = bcontrasts)
+        p <-  cowplot::plot_grid(plotlist = list(p,bcplot),ncol = 1,rel_heights = c(6,1),
+                                           align = "v",axis="b")
+      }
+
+
     }
 
     plot_inter[[paste(i,collapse = ":")]] <- p
@@ -223,5 +259,6 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
   }
 
   #put it all together to return
-  return(list(plot_inter=plot_inter,pred = post,pred_means = means))
+  #return(list(plot_inter=plot_inter,pred = post,pred_means = means))
+  return(plot_inter)
 }

@@ -4,28 +4,14 @@
 \alias{bayes_mm_mainFX}
 \title{output plot and means table for main effects. Can be passed plotting variables for pirateye}
 \usage{
-bayes_mm_mainFX(
-  bmm,
-  mainfxs = NULL,
-  binom = F,
-  xlabpos = 1.1,
-  title = NULL,
-  mainFXcomposite = T,
-  denplot = F,
-  pirate_diffplot = F,
-  ...
-)
+bayes_mm_mainFX(bmm, mainfxs = NULL, title = NULL, contrast_sparkline = F, ...)
 }
 \arguments{
 \item{bmm}{needs a bayes mixed model stanreg object (or a list with one at start)}
 
 \item{mainfxs}{vector of all main effect conditions to be plotted, defaults to all}
 
-\item{mainFXcomposite}{make a composite pirate plot of all main effects}
-
-\item{denplot}{also give a density plot of individual main effects}
-
-\item{pirate_diffplot}{give a pirate difference plot for individual main effects}
+\item{title}{additional text for the title}
 }
 \description{
 output plot and means table for main effects. Can be passed plotting variables for pirateye

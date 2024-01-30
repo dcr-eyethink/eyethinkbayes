@@ -5,7 +5,7 @@
 \title{Wrapper function for a bayesian mixed model, analysis and plots
 can be given an already generated model, or will run it
 with data and specified dvname, conditions and groups
-In ... can pass variables to bayes_mm_mainFX or bayes_mm_interact and pirateye for plotting}
+In ... can pass variables to other bayes functions, and pirateye for plotting}
 \usage{
 bayes_mm(bmm = list(), outp = "analysis", title = NULL, plotcheck = F, ...)
 }
@@ -18,11 +18,11 @@ bayes_mm(bmm = list(), outp = "analysis", title = NULL, plotcheck = F, ...)
 
 \item{plotcheck}{plots traces to check}
 
-\item{...}{parameters for running a new model with \code{\link{bayes_mm_run}}, eg data, dvname, conditions, groups. Or for plotting}
+\item{...}{parameters for running a new model with \code{\link{bayes_mm_run}}, eg data, dvname, conditions, groups. Or for plotting with pirateye. Can also model with explore_browser=T}
 }
 \description{
 Wrapper function for a bayesian mixed model, analysis and plots
 can be given an already generated model, or will run it
 with data and specified dvname, conditions and groups
-In ... can pass variables to bayes_mm_mainFX or bayes_mm_interact and pirateye for plotting
+In ... can pass variables to other bayes functions, and pirateye for plotting
 }

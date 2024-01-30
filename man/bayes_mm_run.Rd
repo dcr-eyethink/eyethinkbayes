@@ -14,7 +14,7 @@ bayes_mm_run(
   mmtype = "intercept",
   binom = F,
   adapt_delta = 0.8,
-  shiny = F,
+  explore_browser = F,
   iter = 2000
 )
 }
@@ -34,6 +34,8 @@ bayes_mm_run(
 \item{binom}{If true uses the binomial / logit family}
 
 \item{adapt_delta}{defults to 0.8, but can get closer to 1 if convergences probs}
+
+\item{explore_browser}{launch a browser interface to explore model (uses shinystan)}
 
 \item{iter}{iterations for the model to run}
 }
