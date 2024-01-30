@@ -1,16 +1,18 @@
 bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=NULL,
                               ribbon=T,ladder=F,spark=F,slope_mpes=T,mfx_sideplot=F,ylim=NULL,
-                              contrast_sparkline=F,
+                              contrast_sparkline=F, show_mpe=T,show_preddist=T,
                               ...){
 
   #' Output plot and means table for interactions. Can plot discrete or continuous factors. Can be passed plotting variables for pirateye
   #' @param interacts interactions you want to plot with : separating, gives all if void. Remember that punctuation gets stripped from condition names
   #' @param bmm needs a bayes mixed model object (or a list with one at start)
+  #' @param contrast_sparkline show distribution of contrast estimate below plot
+  #' @param show_mpe report the mpes between pairs of mean estimates for the first names condition
+  #' @param show_preddist show distributions for the mean estimates
   #' @param pred_values for continuous variables, a vector of values where predictions are made. Defaults to 10 equally spaced steps
-  #' @param ribbon shades area where no evidence lines are different
-  #' @param ladder writes MPEs at each predicted value
-  #' @param spark plots the MPEs at each predicted value below main plot
-  #' @param mfx_sideplot puts a density plot of main effects to the side of a continuous variable
+  #' @param ribbon for continuous variables, shades area where no evidence lines are different
+  #' @param ladder for continuous variables, writes MPEs at each predicted value
+  #' @param spark for continuous variables,plots the MPEs at each predicted value below main plot
   #' @param ... pirateye plotting parameters
   #' @export
 
@@ -205,12 +207,15 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
       setDT(cons)
       cons[,mpes:=scales::percent(round(cons$pd,4))]
 
-      ## get post distributions and reshape into long
+
       bmm_fx <- emmeans::emmeans(bmm,specs = i)
+
+      ## get post distributions
+      if (show_preddist){
       post <- data.table(as.matrix(emmeans::as.mcmc.emmGrid(bmm_fx)))
       post <- melt(post,measure.vars = colnames(post),value.name = dvname)
-
       post[,c(i):=tstrsplit(variable,split=" ")[seq(from=2, to=(2*length(i)), by=2)],by=variable]
+}else{post <- NULL}
 
       ## get contrast post distributions for sparkline
       bcontrasts <- pairs(bmm_fx)
@@ -232,7 +237,7 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
 }
 
       xlabs <- NULL
-      if (dim(cons)[1]>0){
+      if (dim(cons)[1]>0 & (show_mpe)){
         xlabs <- cons
         xlabs$lab <- xlabs$mpes
       }

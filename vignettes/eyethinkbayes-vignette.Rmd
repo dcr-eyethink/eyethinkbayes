@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This is a toolbox for running and plotting bayesian mixed models. Here's how to get the latest version of the toolbox. Note that there are hefty packages that will be needed  for this to work, like rstanarm, so installation might take a while. 
+This is a toolbox for running and plotting bayesian mixed models. Here's how to get the latest version of the toolbox. Note that there are hefty packages that will be needed for this to work, like rstanarm, so installation might take a while. 
 
 ```{r eval=FALSE}
 devtools::install_github("dcr-eyethink/eyethinkbayes")
@@ -36,7 +36,7 @@ Participants of difference ages saw four ads in for four different dimensions (d
 
 ## Running a model
 
-First we are going to run a bayesian mixed model on their rating data, to see if they liked the addressable ads more. This command will create a formula for the model using the conditions you specify as fixed effects, and the groups as random effects. Rstanarm is used to run the model. This may take some minutes to run. There is a parameter here, explore_browser, which if set to TRUE will launch a browser window with an interactive interface that you can use to explore plots and parameters of your model, check it's convergence and so on. 
+First we are going to run a bayesian mixed model on their rating data, to see if they liked the addressable ads more. This command will create a formula for the model using the conditions you specify as fixed effects, and the groups as random effects. Rstanarm is used to run the model. This may take some minutes to run. There is a parameter here, explore_browser, which if set to TRUE will launch a browser window with an interactive interface that you can use to explore plots and parameters of your model, check its convergence and so on. 
 
 ```{r}
 memory_bmm <- bayes_mm_run(data = data,dvname="dprime",conditions = c("adcon","age","tv"),groups = c("pid","dim"),
@@ -46,47 +46,47 @@ Now that we have run the model, we can pass the output to different functions fo
 
 ## Main effects
 
-First, we can look at the main effects. The function bayes_mm_mainFX() will give you means tables, MPEs and contrast for all the main effects you ask for. This will be saved to a text file. The plots show you the observed data (violin) and the distribution of the estimate of the mean (smaller violins).  The MPE is given inbetween the two plots, and is the probability that there is non zero difference between those two conditions. If we don't specify the mainfx arg it will give us all main effects, but here I'm looking at the effect of adcon. 
+First, we can look at the main effects. The function bayes_mm_mainFX() will give you means tables, MPEs and contrast for all the main effects you ask for. This will be saved to a text file. The plots show you the observed data (violin) and the distribution of the estimate of the mean (smaller violins).  If we don't specify the mainfx arg it will give us all main effects, but here I'm looking at the effect of adcon. 
 
-```{r}
+```{r out.width = "90%", fig.width =6,fig.height =4 }
 mfx <- bayes_mm_mainFX(bmm = memory_bmm,mainfxs = "adcon")
 mfx$plot_mainfx
 ```
 
-We can change the plotting here by passing parameters to pirateye(). So here I've drawn bars and asked for 2 main effects, and they've been plotted on a composite plot. These plots are also saved to files, and the w and h parameters control the height and width of the saved pdfs
+Here, the MPE is given inbetween the two plots, and is the probability that there is non zero difference between those two conditions. We can also represent the difference between conditions using sparkline. It shows, beneath the means plots, the distribution of the estimate of the condition difference. 95% of the distribution is shaded in grey, and zero is shown by a vertical black line. So if the black line is outside the grey shaded area, there is a greater than 95% chance that there is a non zero difference between the means. In the plot below I've turned on the sparkline, and turned off the mpes and the predicted distribution of the means. I can also change the plotting here by passing parameters to pirateye(). So here I've drawn bars, and they've been plotted on a composite plot. These plots are also saved to files, and the w and h parameters control the height and width of the saved pdfs.
 
-```{r message=FALSE}
- bayes_mm_mainFX(bmm = memory_bmm,mainfxs = c("adcon","tv"),bars=T,violin=F,contrast_sparkline = T)$plot_mainfx
+```{r  out.width = "90%", fig.width =6,fig.height =4}
+ bayes_mm_mainFX(bmm = memory_bmm,mainfxs = c("adcon","tv"),bars=T,violin=F,contrast_sparkline = T,show_mpe = F,show_preddist = F)
 ```
 
 The final factor in this model is continuous: participant age. We can plot that too, with the MPE reported for a non-zero slope
 
-```{r}
-bayes_mm_mainFX(bmm = memory_bmm,mainfxs = c("age"))$plot_mainfx
+```{r out.width = "90%", fig.width =6,fig.height =4}
+bayes_mm_mainFX(bmm = memory_bmm,mainfxs = c("age"))
 ```
 
 ## Interactions
 
 We can plot interactions in the a similar way. We specify the interactions that we want separated by ":". You can ask for any number of 2 or 3 way interactions. Note that the order matters. The first condition listed will be used for the colour split, the second for the x-axis split, and the 3rd, if used, will split the plot into 2 facets. Interaction plots will default to a split violin for the mean estimates, and I've used bars here again
 
-```{r}
-bayes_mm_interact(memory_bmm, interacts = "adcon:tv",bars=T,violin=F)$plot_inter
+```{r out.width = "90%", fig.width =6,fig.height =4}
+bayes_mm_interact(memory_bmm, interacts = "adcon:tv",bars=T,violin=F)
 ```
 
 We can also look at how continuous variables interact at different levels of a factor. The model plots predictions at 10 points along the x axis by default (you can specify different values if pred_values), and reports the probability that there is a non-zero slope to the lines. The plot below shows that there is strong evidence (98%) for a positive slope for age with addressable content, but weaker evidence (92%) for non-addressable content.
 
-```{r}
+```{r out.width = "90%", fig.width =6,fig.height =4}
 bayes_mm_interact(memory_bmm, interacts = c("adcon:age"))
 ```
 
 We can split the data up further using the third factor. This shows a three way interaction, where the adcon:age relationship is split by tv. As well as reporting the MPE for the slope, the function has looked at the evidence for there being a difference at each of the 10 intervals on the x axis. If there is no evidence (MPE<90) that there is a difference between conditions, it colours the region in grey. So the plot below shows that in the tv=choice condition on the left, there is no difference between addressability conditions for people under 30. But a difference emerges after that, since  as people get older, there is strong evidence that their memory for addressable content gets better (98.8%), but  no evidence (71.7%) for a memory effect with non-addressable content. 
 
-```{r}
+```{r out.width = "90%", fig.width =6,fig.height =4}
 bayes_mm_interact(memory_bmm, interacts = "adcon:age:tv")
 ```
 We can get more fine grained information about those interval differences by displaying them all in a ladder with all the MPEs 
 
-```{r}
+```{r out.width = "90%", fig.width =6,fig.height =4}
 bayes_mm_interact(memory_bmm, interacts = "adcon:age:tv",ladder=T,ribbon=F)
 ```
 
@@ -94,13 +94,14 @@ bayes_mm_interact(memory_bmm, interacts = "adcon:age:tv",ladder=T,ribbon=F)
 
 All the functions above can be carried out by a single, wrapper function, bayes_mm(). This will first run the model, then plot all the main effects and all the interactions. It will also output various model metrics that can be used in reporting, and plot the traces if asked. Here is an analysis for how people rated the adverts, run in one line. I've also asked for plots of the traces to check convergence. If you wanted to see more, you can use explore_browser=TRUE. 
 
-```{r}
+```{r out.width = "90%", fig.width =6,fig.height =4}
 rating_bmm <- bayes_mm(data = data,dvname="rating",conditions = c("adcon","dim","tv"),groups = c("pid"),plotcheck = T)
 ```
 
 Since we have saved the output of the model, we can then do follow up analyses to replot and look at things of interest, by passing the model back through one of our plotting functions. Here's the three way interaction:
 
-```{r}
-bayes_mm_interact(rating_bmm,interacts = "adcon:dim:tv",bars=T,violin=F,contrast_sparkline = T,splitv=F)
+```{r out.width = "90%", fig.width =6,fig.height =4}
+bayes_mm_interact(rating_bmm,interacts = "adcon:dim:tv",violin=F,contrast_sparkline = T,show_mpe  = F)
 ```
 
+If you run into any problems, please raise an issue with github!

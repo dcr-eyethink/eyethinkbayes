@@ -4,7 +4,15 @@
 \alias{bayes_mm_mainFX}
 \title{output plot and means table for main effects. Can be passed plotting variables for pirateye}
 \usage{
-bayes_mm_mainFX(bmm, mainfxs = NULL, title = NULL, contrast_sparkline = F, ...)
+bayes_mm_mainFX(
+  bmm,
+  mainfxs = NULL,
+  title = NULL,
+  contrast_sparkline = F,
+  show_mpe = T,
+  show_preddist = T,
+  ...
+)
 }
 \arguments{
 \item{bmm}{needs a bayes mixed model stanreg object (or a list with one at start)}
@@ -12,6 +20,12 @@ bayes_mm_mainFX(bmm, mainfxs = NULL, title = NULL, contrast_sparkline = F, ...)
 \item{mainfxs}{vector of all main effect conditions to be plotted, defaults to all}
 
 \item{title}{additional text for the title}
+
+\item{contrast_sparkline}{show distribution of contrast estimate below plot}
+
+\item{show_mpe}{report the mpes between pairs of mean estimates for the first names condition}
+
+\item{show_preddist}{show distributions for the mean estimates}
 }
 \description{
 output plot and means table for main effects. Can be passed plotting variables for pirateye

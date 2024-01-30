@@ -9,20 +9,20 @@ stan_glmer
                                     Median MAD_SD
 (Intercept)                          1.8    0.4  
 adconnon_address                    -0.8    0.6  
-dimcruise                            0.5    0.6  
+dimcruise                            0.4    0.5  
 dimdog                              -0.5    0.6  
 dimgames                             0.9    0.5  
 tvrandom                            -1.0    0.6  
-adconnon_address:dimcruise          -0.5    0.9  
+adconnon_address:dimcruise          -0.5    0.8  
 adconnon_address:dimdog             -0.7    0.9  
-adconnon_address:dimgames           -3.7    0.8  
-adconnon_address:tvrandom            0.7    0.8  
+adconnon_address:dimgames           -3.6    0.9  
+adconnon_address:tvrandom            0.7    0.9  
 dimcruise:tvrandom                   0.6    0.8  
 dimdog:tvrandom                      1.3    0.8  
 dimgames:tvrandom                    0.2    0.8  
 adconnon_address:dimcruise:tvrandom -1.1    1.2  
-adconnon_address:dimdog:tvrandom    -0.1    1.2  
-adconnon_address:dimgames:tvrandom   0.6    1.2  
+adconnon_address:dimdog:tvrandom     0.0    1.2  
+adconnon_address:dimgames:tvrandom   0.6    1.3  
 
 Auxiliary parameter(s):
       Median MAD_SD
@@ -65,30 +65,30 @@ See help('prior_summary.stanreg') for more details
 
 Parameter                           | Median |         95% CI |     pd | % in ROPE |  Rhat |     ESS |                  Prior
 -----------------------------------------------------------------------------------------------------------------------------
-(Intercept)                         |   1.77 | [ 0.95,  2.58] |   100% |        0% | 1.002 |  961.00 |  Normal (0.89 +- 8.73)
-adconnon_address                    |  -0.77 | [-1.94,  0.37] | 90.80% |    22.82% | 1.002 |  829.00 | Normal (0.00 +- 17.44)
-dimcruise                           |   0.46 | [-0.62,  1.54] | 78.22% |    36.76% | 1.000 | 1304.00 | Normal (0.00 +- 20.14)
-dimdog                              |  -0.45 | [-1.61,  0.66] | 78.77% |    36.47% | 1.000 | 1187.00 | Normal (0.00 +- 20.14)
-dimgames                            |   0.89 | [-0.15,  1.96] | 95.12% |    14.24% | 1.001 | 1298.00 | Normal (0.00 +- 20.14)
-tvrandom                            |  -1.02 | [-2.25,  0.17] | 95.15% |    12.29% | 1.001 |  853.00 | Normal (0.00 +- 17.45)
-adconnon_address:dimcruise          |  -0.51 | [-2.16,  1.18] | 72.42% |    27.03% | 1.001 | 1044.00 | Normal (0.00 +- 25.78)
-adconnon_address:dimdog             |  -0.69 | [-2.38,  1.00] | 77.80% |    25.21% | 1.000 |  931.00 | Normal (0.00 +- 25.99)
-adconnon_address:dimgames           |  -3.65 | [-5.27, -2.02] |   100% |        0% | 1.003 |  984.00 | Normal (0.00 +- 26.54)
-adconnon_address:tvrandom           |   0.67 | [-0.96,  2.28] | 79.25% |    25.89% | 1.001 |  773.00 | Normal (0.00 +- 20.24)
-dimcruise:tvrandom                  |   0.61 | [-0.95,  2.18] | 77.72% |    27.84% | 1.001 | 1151.00 | Normal (0.00 +- 26.54)
-dimdog:tvrandom                     |   1.35 | [-0.25,  2.90] | 95.35% |     8.05% | 1.000 | 1014.00 | Normal (0.00 +- 26.54)
-dimgames:tvrandom                   |   0.19 | [-1.35,  1.74] | 59.65% |    34.61% | 1.001 | 1088.00 | Normal (0.00 +- 26.54)
-adconnon_address:dimcruise:tvrandom |  -1.09 | [-3.49,  1.22] | 82.45% |    16.53% | 1.001 | 1023.00 | Normal (0.00 +- 35.46)
-adconnon_address:dimdog:tvrandom    |  -0.06 | [-2.43,  2.40] | 51.90% |    23.05% | 1.000 |  879.00 | Normal (0.00 +- 37.94)
-adconnon_address:dimgames:tvrandom  |   0.63 | [-1.69,  3.04] | 69.95% |    20.76% | 1.001 |  910.00 | Normal (0.00 +- 36.12)
+(Intercept)                         |   1.77 | [ 0.98,  2.59] |   100% |        0% | 1.003 | 1119.00 |  Normal (0.89 +- 8.73)
+adconnon_address                    |  -0.79 | [-2.00,  0.35] | 90.95% |    21.39% | 1.002 | 1025.00 | Normal (0.00 +- 17.44)
+dimcruise                           |   0.44 | [-0.59,  1.51] | 79.10% |    38.68% | 1.002 | 1331.00 | Normal (0.00 +- 20.14)
+dimdog                              |  -0.48 | [-1.62,  0.65] | 80.00% |    35.74% | 1.001 | 1315.00 | Normal (0.00 +- 20.14)
+dimgames                            |   0.87 | [-0.20,  1.90] | 95.15% |    14.97% | 1.002 | 1309.00 | Normal (0.00 +- 20.14)
+tvrandom                            |  -1.00 | [-2.19,  0.22] | 94.53% |    12.58% | 1.002 | 1010.00 | Normal (0.00 +- 17.45)
+adconnon_address:dimcruise          |  -0.48 | [-2.20,  1.19] | 71.15% |    28.84% | 1.002 | 1179.00 | Normal (0.00 +- 25.78)
+adconnon_address:dimdog             |  -0.67 | [-2.32,  1.09] | 76.88% |    24.82% | 1.000 | 1098.00 | Normal (0.00 +- 25.99)
+adconnon_address:dimgames           |  -3.63 | [-5.29, -1.91] |   100% |        0% | 1.002 | 1108.00 | Normal (0.00 +- 26.54)
+adconnon_address:tvrandom           |   0.68 | [-0.98,  2.33] | 78.50% |    25.89% | 1.002 |  927.00 | Normal (0.00 +- 20.24)
+dimcruise:tvrandom                  |   0.60 | [-0.98,  2.12] | 77.50% |    27.97% | 1.001 | 1262.00 | Normal (0.00 +- 26.54)
+dimdog:tvrandom                     |   1.35 | [-0.23,  2.81] | 95.58% |     8.29% | 1.001 | 1134.00 | Normal (0.00 +- 26.54)
+dimgames:tvrandom                   |   0.20 | [-1.39,  1.73] | 60.25% |    34.82% | 1.002 | 1160.00 | Normal (0.00 +- 26.54)
+adconnon_address:dimcruise:tvrandom |  -1.09 | [-3.42,  1.28] | 82.35% |    16.16% | 1.001 | 1117.00 | Normal (0.00 +- 35.46)
+adconnon_address:dimdog:tvrandom    |  -0.04 | [-2.41,  2.29] | 51.82% |    23.68% | 1.001 | 1042.00 | Normal (0.00 +- 37.94)
+adconnon_address:dimgames:tvrandom  |   0.63 | [-1.86,  3.04] | 68.83% |    19.61% | 1.003 | 1013.00 | Normal (0.00 +- 36.12)
 
 Main effects means:  adcon 
 Estimated Marginal Means
 
 adcon       | Mean |        95% CI
 ----------------------------------
-addressable | 1.74 | [ 1.37, 2.13]
-non_address | 0.02 | [-0.37, 0.42]
+addressable | 1.75 | [ 1.37, 2.14]
+non_address | 0.04 | [-0.33, 0.41]
 
 Marginal means estimated at adcon
 
@@ -97,7 +97,7 @@ Marginal Contrasts Analysis
 
 Level1      |      Level2 | Difference |       95% CI |   pd | % in ROPE
 ------------------------------------------------------------------------
-addressable | non_address |       1.72 | [1.34, 2.09] | 100% |        0%
+addressable | non_address |       1.71 | [1.34, 2.10] | 100% |        0%
 
 Marginal contrasts estimated at adcon
 
@@ -106,10 +106,10 @@ Estimated Marginal Means
 
 dim    | Mean |        95% CI
 -----------------------------
-car    | 1.03 | [ 0.57, 1.51]
-cruise | 1.26 | [ 0.80, 1.71]
-dog    | 0.89 | [ 0.42, 1.35]
-games  | 0.35 | [-0.11, 0.82]
+car    | 1.04 | [ 0.57, 1.50]
+cruise | 1.26 | [ 0.80, 1.74]
+dog    | 0.89 | [ 0.44, 1.38]
+games  | 0.36 | [-0.08, 0.81]
 
 Marginal means estimated at dim
 
@@ -118,12 +118,12 @@ Marginal Contrasts Analysis
 
 Level1 | Level2 | Difference |        95% CI |     pd | % in ROPE
 -----------------------------------------------------------------
-car    | cruise |      -0.22 | [-0.75, 0.29] | 80.33% |    22.26%
-car    |    dog |       0.16 | [-0.40, 0.67] | 72.02% |    24.68%
-car    |  games |       0.68 | [ 0.15, 1.21] | 99.30% |        0%
-cruise |    dog |       0.38 | [-0.14, 0.89] | 91.85% |    11.42%
-cruise |  games |       0.91 | [ 0.39, 1.43] |   100% |        0%
-dog    |  games |       0.54 | [ 0.01, 1.04] | 97.67% |     3.42%
+car    | cruise |      -0.23 | [-0.75, 0.31] | 79.47% |    22.13%
+car    |    dog |       0.15 | [-0.39, 0.68] | 70.35% |    26.32%
+car    |  games |       0.68 | [ 0.18, 1.19] | 99.65% |        0%
+cruise |    dog |       0.38 | [-0.15, 0.91] | 91.72% |    12.03%
+cruise |  games |       0.91 | [ 0.39, 1.42] | 99.98% |        0%
+dog    |  games |       0.53 | [ 0.01, 1.06] | 97.60% |     3.55%
 
 Marginal contrasts estimated at dim
 
@@ -132,8 +132,8 @@ Estimated Marginal Means
 
 tv     | Mean |       95% CI
 ----------------------------
-choice | 0.98 | [0.51, 1.48]
-random | 0.78 | [0.31, 1.26]
+choice | 0.99 | [0.52, 1.45]
+random | 0.80 | [0.34, 1.26]
 
 Marginal means estimated at tv
 
@@ -142,7 +142,7 @@ Marginal Contrasts Analysis
 
 Level1 | Level2 | Difference |        95% CI |     pd | % in ROPE
 -----------------------------------------------------------------
-choice | random |       0.21 | [-0.46, 0.87] | 73.02% |    18.92%
+choice | random |       0.18 | [-0.46, 0.84] | 71.10% |    21.42%
 
 Marginal contrasts estimated at tv
 
@@ -150,14 +150,14 @@ Interactions: means of levels of   adcon  within levels of  dimEstimated Margina
 
 adcon       |    dim |  Mean |         95% CI
 ---------------------------------------------
-addressable |    car |  1.25 | [ 0.63,  1.87]
-non_address |    car |  0.81 | [ 0.17,  1.46]
-addressable | cruise |  2.01 | [ 1.39,  2.65]
-non_address | cruise |  0.51 | [-0.11,  1.11]
-addressable |    dog |  1.47 | [ 0.82,  2.08]
-non_address |    dog |  0.30 | [-0.29,  0.90]
-addressable |  games |  2.24 | [ 1.63,  2.85]
-non_address |  games | -1.53 | [-2.16, -0.90]
+addressable |    car |  1.27 | [ 0.67,  1.88]
+non_address |    car |  0.81 | [ 0.15,  1.44]
+addressable | cruise |  2.02 | [ 1.40,  2.62]
+non_address | cruise |  0.52 | [-0.07,  1.14]
+addressable |    dog |  1.47 | [ 0.85,  2.10]
+non_address |    dog |  0.32 | [-0.30,  0.93]
+addressable |  games |  2.25 | [ 1.62,  2.86]
+non_address |  games | -1.52 | [-2.12, -0.91]
 
 Marginal means estimated at adcon, dim
 
@@ -165,10 +165,10 @@ Interations: contrasts between levels of   adcon  within levels of  dimMarginal 
 
 Level1      |      Level2 |    dim | Difference |        95% CI |     pd | % in ROPE
 ------------------------------------------------------------------------------------
-addressable | non_address |    car |       0.44 | [-0.38, 1.27] | 85.22% |    12.66%
-addressable | non_address | cruise |       1.50 | [ 0.65, 2.33] |   100% |        0%
-addressable | non_address |    dog |       1.16 | [ 0.31, 1.98] | 99.65% |        0%
-addressable | non_address |  games |       3.77 | [ 2.98, 4.58] |   100% |        0%
+addressable | non_address |    car |       0.46 | [-0.36, 1.30] | 86.70% |    10.71%
+addressable | non_address | cruise |       1.50 | [ 0.68, 2.27] |   100% |        0%
+addressable | non_address |    dog |       1.14 | [ 0.30, 1.98] | 99.58% |        0%
+addressable | non_address |  games |       3.76 | [ 2.94, 4.56] |   100% |        0%
 
 Marginal contrasts estimated at adcon
 
@@ -176,10 +176,10 @@ Interactions: means of levels of   adcon  within levels of  tvEstimated Marginal
 
 adcon       |     tv |      Mean |        95% CI
 ------------------------------------------------
-addressable | choice |      1.98 | [ 1.43, 2.54]
-non_address | choice | -7.10e-03 | [-0.55, 0.56]
-addressable | random |      1.50 | [ 0.95, 2.05]
-non_address | random |      0.06 | [-0.48, 0.58]
+addressable | choice |      1.98 | [ 1.45, 2.50]
+non_address | choice | -7.10e-03 | [-0.55, 0.52]
+addressable | random |      1.52 | [ 0.99, 2.07]
+non_address | random |      0.08 | [-0.44, 0.59]
 
 Marginal means estimated at adcon, tv
 
@@ -187,7 +187,7 @@ Interations: contrasts between levels of   adcon  within levels of  tvMarginal C
 
 Level1      |      Level2 |     tv | Difference |       95% CI |   pd | % in ROPE
 ---------------------------------------------------------------------------------
-addressable | non_address | choice |       1.99 | [1.45, 2.51] | 100% |        0%
+addressable | non_address | choice |       1.98 | [1.48, 2.51] | 100% |        0%
 addressable | non_address | random |       1.45 | [0.92, 1.97] | 100% |        0%
 
 Marginal contrasts estimated at adcon
@@ -196,36 +196,36 @@ Interactions: means of levels of   adcon  within levels of  dim tvEstimated Marg
 
 adcon       |    dim |     tv |  Mean |         95% CI
 ------------------------------------------------------
-addressable |    car | choice |  1.77 | [ 0.95,  2.58]
-non_address |    car | choice |  0.98 | [ 0.02,  1.94]
-addressable | cruise | choice |  2.20 | [ 1.30,  3.09]
-non_address | cruise | choice |  0.93 | [ 0.06,  1.79]
-addressable |    dog | choice |  1.30 | [ 0.36,  2.26]
-non_address |    dog | choice | -0.17 | [-1.00,  0.65]
-addressable |  games | choice |  2.64 | [ 1.83,  3.51]
-non_address |  games | choice | -1.78 | [-2.65, -0.87]
-addressable |    car | random |  0.75 | [-0.16,  1.65]
-non_address |    car | random |  0.63 | [-0.22,  1.52]
-addressable | cruise | random |  1.80 | [ 0.92,  2.75]
-non_address | cruise | random |  0.10 | [-0.76,  0.97]
-addressable |    dog | random |  1.63 | [ 0.80,  2.47]
-non_address |    dog | random |  0.78 | [-0.14,  1.67]
-addressable |  games | random |  1.83 | [ 0.96,  2.72]
-non_address |  games | random | -1.28 | [-2.18, -0.45]
+addressable |    car | choice |  1.77 | [ 0.98,  2.59]
+non_address |    car | choice |  0.97 | [ 0.00,  1.90]
+addressable | cruise | choice |  2.21 | [ 1.36,  3.09]
+non_address | cruise | choice |  0.93 | [ 0.06,  1.80]
+addressable |    dog | choice |  1.30 | [ 0.36,  2.20]
+non_address |    dog | choice | -0.17 | [-0.98,  0.64]
+addressable |  games | choice |  2.65 | [ 1.79,  3.48]
+non_address |  games | choice | -1.77 | [-2.65, -0.90]
+addressable |    car | random |  0.77 | [-0.09,  1.67]
+non_address |    car | random |  0.65 | [-0.20,  1.49]
+addressable | cruise | random |  1.83 | [ 0.94,  2.69]
+non_address | cruise | random |  0.11 | [-0.72,  0.97]
+addressable |    dog | random |  1.64 | [ 0.78,  2.50]
+non_address |    dog | random |  0.81 | [-0.08,  1.72]
+addressable |  games | random |  1.85 | [ 0.96,  2.73]
+non_address |  games | random | -1.28 | [-2.12, -0.41]
 
 Marginal means estimated at adcon, dim, tv
 Interations: contrasts between levels of   adcon  within levels of  dim tvMarginal Contrasts Analysis
 
 Level1      |      Level2 |    dim |     tv | Difference |        95% CI |     pd | % in ROPE
 ---------------------------------------------------------------------------------------------
-addressable | non_address |    car | choice |       0.77 | [-0.37, 1.94] | 90.80% |     6.03%
-addressable | non_address | cruise | choice |       1.29 | [ 0.08, 2.45] | 98.22% |     0.13%
-addressable | non_address |    dog | choice |       1.47 | [ 0.32, 2.66] | 99.33% |        0%
-addressable | non_address |  games | choice |       4.42 | [ 3.33, 5.56] |   100% |        0%
-addressable | non_address |    car | random |       0.11 | [-1.04, 1.28] | 56.93% |    13.26%
-addressable | non_address | cruise | random |       1.71 | [ 0.51, 2.93] | 99.80% |        0%
-addressable | non_address |    dog | random |       0.86 | [-0.31, 2.04] | 91.97% |     5.66%
-addressable | non_address |  games | random |       3.13 | [ 1.97, 4.26] |   100% |        0%
+addressable | non_address |    car | choice |       0.79 | [-0.35, 2.00] | 90.95% |     5.89%
+addressable | non_address | cruise | choice |       1.29 | [ 0.18, 2.44] | 98.95% |        0%
+addressable | non_address |    dog | choice |       1.47 | [ 0.31, 2.61] | 99.28% |        0%
+addressable | non_address |  games | choice |       4.42 | [ 3.24, 5.55] |   100% |        0%
+addressable | non_address |    car | random |       0.13 | [-1.04, 1.29] | 58.63% |    14.03%
+addressable | non_address | cruise | random |       1.71 | [ 0.57, 2.80] | 99.88% |        0%
+addressable | non_address |    dog | random |       0.85 | [-0.37, 2.00] | 91.45% |     4.74%
+addressable | non_address |  games | random |       3.12 | [ 1.95, 4.26] |   100% |        0%
 
 Marginal contrasts estimated at adcon
 $`adcon:dim`

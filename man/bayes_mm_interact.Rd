@@ -17,6 +17,8 @@ bayes_mm_interact(
   mfx_sideplot = F,
   ylim = NULL,
   contrast_sparkline = F,
+  show_mpe = T,
+  show_preddist = T,
   ...
 )
 }
@@ -27,13 +29,17 @@ bayes_mm_interact(
 
 \item{pred_values}{for continuous variables, a vector of values where predictions are made. Defaults to 10 equally spaced steps}
 
-\item{ribbon}{shades area where no evidence lines are different}
+\item{ribbon}{for continuous variables, shades area where no evidence lines are different}
 
-\item{ladder}{writes MPEs at each predicted value}
+\item{ladder}{for continuous variables, writes MPEs at each predicted value}
 
-\item{spark}{plots the MPEs at each predicted value below main plot}
+\item{spark}{for continuous variables,plots the MPEs at each predicted value below main plot}
 
-\item{mfx_sideplot}{puts a density plot of main effects to the side of a continuous variable}
+\item{contrast_sparkline}{show distribution of contrast estimate below plot}
+
+\item{show_mpe}{report the mpes between pairs of mean estimates for the first names condition}
+
+\item{show_preddist}{show distributions for the mean estimates}
 
 \item{...}{pirateye plotting parameters}
 }

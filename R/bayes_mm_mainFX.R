@@ -1,8 +1,12 @@
-bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...){
+bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,
+                            show_mpe=T,show_preddist=T,...){
   #' output plot and means table for main effects. Can be passed plotting variables for pirateye
   #' @param mainfxs vector of all main effect conditions to be plotted, defaults to all
   #' @param bmm needs a bayes mixed model stanreg object (or a list with one at start)
   #' @param title additional text for the title
+  #' @param contrast_sparkline show distribution of contrast estimate below plot
+  #' @param show_mpe report the mpes between pairs of mean estimates for the first names condition
+  #' @param show_preddist show distributions for the mean estimates
   #' @export
 
   if (names(bmm[1])=="bmm"){bmm <- bmm$bmm}
@@ -22,8 +26,7 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...
   obsdata <- data.frame()
   post <- data.table()
 
-  cont_plots <- list()
-  other_plots <- list()
+  all_plots <- list()
 
   for (cond in na.omit(mainfxs)){
 
@@ -84,11 +87,13 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...
 
       # make a separate plot
       setnames(means,"Mean",dvname)
-      slopes <- data.table(modelbased::estimate_slopes(bmm, trend = cond))
+      slopes <- NULL
+     if (show_mpe){
+       slopes <- data.table(modelbased::estimate_slopes(bmm, trend = cond))
       slopes$lab <- scales::percent(slopes$pd)
       slopes <- cbind(means[.N,1:2],slopes)
-
-      cont_plots[[cond]] <- do.call(pirateye,resolve.args(data=data,...,
+}
+      all_plots[[cond]] <- do.call(pirateye,resolve.args(data=data,...,
                                                           pred_means =means,xlabs =slopes,pred_line = T,
                                                           dv=dvname,x_condition=cond,
                                                           line=F,violin=F,dots=T,w=4,
@@ -107,15 +112,17 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...
 
     # make a composite plot
     # label variables separately
+    if (show_preddist){
     setDT(post)
-    #post[,levels:=unlist(strsplit(as.character(variable),split = " "))[2],by=variable]
-    #
+
     post[,levels:=tstrsplit(variable,split=" ")[2],by=variable]
 
     post$variable <- NULL
-
     post$condition <- as.factor( post$condition)
     post$levels <- as.factor( post$levels)
+
+    }else{post <- NULL}
+
     obsdata$condition <- as.factor( obsdata$condition)
     obsdata$levels <- as.factor( obsdata$levels)
 
@@ -123,19 +130,18 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...
     setnames(m,"mean",dvname)
 
 
-    if (dim(mpe)[1]==0){mpe <- NULL}else{mpe$lab <- mpe$mpes}
+    if (dim(mpe)[1]==0 | !(show_mpe)){mpe <- NULL}else{mpe$lab <- mpe$mpes}
 
 
 
       plot_mainfx <- do.call(pirateye,resolve.args(data = obsdata, colour_condition = "levels",
                                                    pred = post,pred_means = m,facet_condition = "condition",
-                                                   facet_scales="free_x",
+                                                   facet_scales="free_x",xlabs = mpe,
                                                    dv = dvname,
                                                    ...,
-                                                   dots=F,error_bars = F,xlabs = mpe,
+                                                   dots=F,error_bars = F,
                                                    title=paste(dvname,paste0(mainfxs,collapse="_"),"MainFX BayesPirate",title),
-                                                   title_overide=T,
-                                                   combine_plots=cont_plots))
+                                                   title_overide=T))
 
      # do we want a sparkline for the contrasts?
 
@@ -146,6 +152,8 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...
                                               align = "v",axis="b")
       }
 
+      all_plots <- append(list(plot_mainfx=plot_mainfx),all_plots)
+
   }else{
       # no further data so return continuous plot alone
 
@@ -153,6 +161,8 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...
 
 ### combine  plot_mainfx and cont_plots (if we have them)
 
+  combined_plot_mainfx <- cowplot::plot_grid(plotlist =  all_plots,
+                                             nrow = 1,align = 'v',axis = "l")
 
 
 
@@ -163,6 +173,6 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,...
                       bcontrasts=bcontrasts)
 
 
-  return(list(plot_mainfx=plot_mainfx,data_mainfx=data_mainfx,other_plots=other_plots))
+  return(list(plot_mainfx=combined_plot_mainfx))
 
 }
