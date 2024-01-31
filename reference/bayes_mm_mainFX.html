@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">eyethinkbayes</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,12 +57,10 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">bayes_mm_mainFX</span><span class="op">(</span></span>
 <span>  <span class="va">bmm</span>,</span>
 <span>  mainfxs <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  binom <span class="op">=</span> <span class="cn">F</span>,</span>
-<span>  xlabpos <span class="op">=</span> <span class="fl">1.1</span>,</span>
 <span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  mainFXcomposite <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>  denplot <span class="op">=</span> <span class="cn">F</span>,</span>
-<span>  pirate_diffplot <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  contrast_sparkline <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  show_mpe <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  show_preddist <span class="op">=</span> <span class="cn">T</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -77,16 +75,20 @@
 <dd><p>vector of all main effect conditions to be plotted, defaults to all</p></dd>
 
 
-<dt>mainFXcomposite</dt>
-<dd><p>make a composite pirate plot of all main effects</p></dd>
+<dt>title</dt>
+<dd><p>additional text for the title</p></dd>
 
 
-<dt>denplot</dt>
-<dd><p>also give a density plot of individual main effects</p></dd>
+<dt>contrast_sparkline</dt>
+<dd><p>show distribution of contrast estimate below plot</p></dd>
 
 
-<dt>pirate_diffplot</dt>
-<dd><p>give a pirate difference plot for individual main effects</p></dd>
+<dt>show_mpe</dt>
+<dd><p>report the mpes between pairs of mean estimates for the first names condition</p></dd>
+
+
+<dt>show_preddist</dt>
+<dd><p>show distributions for the mean estimates</p></dd>
 
 </dl></div>
 

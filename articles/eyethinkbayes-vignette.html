@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">eyethinkbayes</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,12 +77,845 @@
 
     
     
+<p>This is a toolbox for running and plotting bayesian mixed models.
+Here’s how to get the latest version of the toolbox. Note that there are
+hefty packages that will be needed for this to work, like rstanarm, so
+installation might take a while.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"dcr-eyethink/eyethinkbayes"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dcr-eyethink/eyethinkbayes" class="external-link">eyethinkbayes</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading required package: eyethinkdata</span></span>
 <span><span class="co">#&gt; Loading required package: data.table</span></span>
 <span><span class="co">#&gt; Loading required package: ggplot2</span></span></code></pre></div>
-  </main>
+<p>Usually, I use the wrapper command bayes_mm() to call a series of
+functions that run, analyse, report and plot a model in all one step. In
+this vignette I’m going to first show you each of those functions in
+turn to break down what they do. Then we’ll return to the wrapper
+function that can do it in one step.</p>
+<p>We’re going to work on some behavioural data from an experiment in
+which people watched TV shows and adverts. We are interested in whether
+they prefer and remember ads that are ‘addressable’. This means that the
+ads are related to their personal interests in some way. First let’s
+read in the trial data</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu">data.table</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"ad_data.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="right">pid</th>
+<th align="left">dim</th>
+<th align="left">adcon</th>
+<th align="left">tv</th>
+<th align="right">rating</th>
+<th align="right">age</th>
+<th align="left">agecat</th>
+<th align="right">dprime</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">6700131</td>
+<td align="left">car</td>
+<td align="left">addressable</td>
+<td align="left">choice</td>
+<td align="right">1.00</td>
+<td align="right">27</td>
+<td align="left">18_34</td>
+<td align="right">0.9674216</td>
+</tr>
+<tr class="even">
+<td align="right">6700131</td>
+<td align="left">cruise</td>
+<td align="left">addressable</td>
+<td align="left">choice</td>
+<td align="right">3.25</td>
+<td align="right">27</td>
+<td align="left">18_34</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="right">6700131</td>
+<td align="left">dog</td>
+<td align="left">non-address</td>
+<td align="left">choice</td>
+<td align="right">4.75</td>
+<td align="right">27</td>
+<td align="left">18_34</td>
+<td align="right">1.2496377</td>
+</tr>
+<tr class="even">
+<td align="right">6700131</td>
+<td align="left">games</td>
+<td align="left">non-address</td>
+<td align="left">choice</td>
+<td align="right">0.25</td>
+<td align="right">27</td>
+<td align="left">18_34</td>
+<td align="right">0.2822161</td>
+</tr>
+<tr class="odd">
+<td align="right">6700745</td>
+<td align="left">car</td>
+<td align="left">non-address</td>
+<td align="left">choice</td>
+<td align="right">0.00</td>
+<td align="right">43</td>
+<td align="left">35.54</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="right">6700745</td>
+<td align="left">cruise</td>
+<td align="left">non-address</td>
+<td align="left">choice</td>
+<td align="right">-3.00</td>
+<td align="right">43</td>
+<td align="left">35.54</td>
+<td align="right">1.0037630</td>
+</tr>
+</tbody>
+</table>
+<p>Participants of difference ages saw four ads in for four different
+dimensions (dim) that could be addressed to the interests or not
+(adcon). They watched a TV show that they chose or not (tv). Here we
+have summary data for each dimension: how much they liked the adverts
+(rating), and their memory for them when shown stills later
+(dprime).</p>
+<div class="section level2">
+<h2 id="running-a-model">Running a model<a class="anchor" aria-label="anchor" href="#running-a-model"></a>
+</h2>
+<p>First we are going to run a bayesian mixed model on their rating
+data, to see if they liked the addressable ads more. This command will
+create a formula for the model using the conditions you specify as fixed
+effects, and the groups as random effects. Rstanarm is used to run the
+model. This may take some minutes to run. There is a parameter here,
+explore_browser, which if set to TRUE will launch a browser window with
+an interactive interface that you can use to explore plots and
+parameters of your model, check its convergence and so on.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">memory_bmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bayes_mm_run.html">bayes_mm_run</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>,dvname<span class="op">=</span><span class="st">"dprime"</span>,conditions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"adcon"</span>,<span class="st">"age"</span>,<span class="st">"tv"</span><span class="op">)</span>,groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pid"</span>,<span class="st">"dim"</span><span class="op">)</span>,</span>
+<span>                           explore_browser <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "running model"</span></span></code></pre></div>
+<p>Now that we have run the model, we can pass the output to different
+functions for the plotting and reporting.</p>
+</div>
+<div class="section level2">
+<h2 id="main-effects">Main effects<a class="anchor" aria-label="anchor" href="#main-effects"></a>
+</h2>
+<p>First, we can look at the main effects. The function
+bayes_mm_mainFX() will give you means tables, MPEs and contrast for all
+the main effects you ask for. This will be saved to a text file. The
+plots show you the observed data (violin) and the distribution of the
+estimate of the mean (smaller violins). If we don’t specify the mainfx
+arg it will give us all main effects, but here I’m looking at the effect
+of adcon.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mfx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bayes_mm_mainFX.html">bayes_mm_mainFX</a></span><span class="op">(</span>bmm <span class="op">=</span> <span class="va">memory_bmm</span>,mainfxs <span class="op">=</span> <span class="st">"adcon"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects means:  adcon </span></span>
+<span><span class="co">#&gt; Estimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       | Mean |       95% CI |   pd</span></span>
+<span><span class="co">#&gt; ----------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | 0.77 | [0.58, 0.98] | 100%</span></span>
+<span><span class="co">#&gt; non_address | 0.60 | [0.40, 0.80] | 100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects contrasts:  adcon </span></span>
+<span><span class="co">#&gt; Marginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 | Difference |       95% CI |   pd | % in ROPE</span></span>
+<span><span class="co">#&gt; ------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address |       0.17 | [0.09, 0.25] | 100% |     2.00%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="va">mfx</span><span class="op">$</span><span class="va">plot_mainfx</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-5-1.png" width="90%"></p>
+<p>Here, the MPE is given inbetween the two plots, and is the
+probability that there is non zero difference between those two
+conditions. We can also represent the difference between conditions
+using sparkline. It shows, beneath the means plots, the distribution of
+the estimate of the condition difference. 95% of the distribution is
+shaded in grey, and zero is shown by a vertical black line. So if the
+black line is outside the grey shaded area, there is a greater than 95%
+chance that there is a non zero difference between the means. In the
+plot below I’ve turned on the sparkline, and turned off the mpes and the
+predicted distribution of the means. I can also change the plotting here
+by passing parameters to pirateye(). So here I’ve drawn bars, and
+they’ve been plotted on a composite plot. These plots are also saved to
+files, and the w and h parameters control the height and width of the
+saved pdfs.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span> <span class="fu"><a href="../reference/bayes_mm_mainFX.html">bayes_mm_mainFX</a></span><span class="op">(</span>bmm <span class="op">=</span> <span class="va">memory_bmm</span>,mainfxs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"adcon"</span>,<span class="st">"tv"</span><span class="op">)</span>,bars<span class="op">=</span><span class="cn">T</span>,violin<span class="op">=</span><span class="cn">F</span>,contrast_sparkline <span class="op">=</span> <span class="cn">T</span>,show_mpe <span class="op">=</span> <span class="cn">F</span>,show_preddist <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects means:  adcon </span></span>
+<span><span class="co">#&gt; Estimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       | Mean |       95% CI |   pd</span></span>
+<span><span class="co">#&gt; ----------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | 0.77 | [0.58, 0.98] | 100%</span></span>
+<span><span class="co">#&gt; non_address | 0.60 | [0.40, 0.80] | 100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects contrasts:  adcon </span></span>
+<span><span class="co">#&gt; Marginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 | Difference |       95% CI |   pd | % in ROPE</span></span>
+<span><span class="co">#&gt; ------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address |       0.17 | [0.09, 0.25] | 100% |     2.00%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects means:  tv </span></span>
+<span><span class="co">#&gt; Estimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; tv     | Mean |       95% CI |   pd</span></span>
+<span><span class="co">#&gt; -----------------------------------</span></span>
+<span><span class="co">#&gt; choice | 0.68 | [0.48, 0.89] | 100%</span></span>
+<span><span class="co">#&gt; random | 0.69 | [0.48, 0.90] | 100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at tv</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects contrasts:  tv </span></span>
+<span><span class="co">#&gt; Marginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1 | Level2 | Difference |        95% CI |     pd | % in ROPE</span></span>
+<span><span class="co">#&gt; -----------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; choice | random |  -7.39e-03 | [-0.14, 0.12] | 54.55% |    90.71%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at tv</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; $plot_mainfx</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-6-1.png" width="90%"></p>
+</div>
+<div class="section level2">
+<h2 id="interactions">Interactions<a class="anchor" aria-label="anchor" href="#interactions"></a>
+</h2>
+<p>We can plot interactions in the a similar way. We specify the
+interactions that we want separated by “:”. You can ask for any number
+of 2 or 3 way interactions. Note that the order matters. The first
+condition listed will be used for the colour split, the second for the
+x-axis split, and the 3rd, if used, will split the plot into 2 facets.
+Interaction plots will default to a split violin for the mean estimates,
+and I’ve used bars here again</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bayes_mm_interact.html">bayes_mm_interact</a></span><span class="op">(</span><span class="va">memory_bmm</span>, interacts <span class="op">=</span> <span class="st">"adcon:tv"</span>,bars<span class="op">=</span><span class="cn">T</span>,violin<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  tvEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |     tv | Mean | Median.1 |       95% CI |     pd</span></span>
+<span><span class="co">#&gt; --------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | choice | 0.75 |     0.75 | [0.54, 0.96] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 0.62 |     0.62 | [0.41, 0.83] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 0.80 |     0.80 | [0.59, 1.01] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 0.59 |     0.59 | [0.38, 0.81] |   100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, tv</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interations: contrasts between levels of   adcon  within levels of  tvMarginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 |     tv | Difference |       95% CI |     pd | % in ROPE</span></span>
+<span><span class="co">#&gt; -----------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address | choice |       0.13 | [0.02, 0.25] | 98.90% |    28.32%</span></span>
+<span><span class="co">#&gt; addressable | non_address | random |       0.21 | [0.09, 0.32] |   100% |     0.84%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; $`adcon:tv`</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-7-1.png" width="90%"></p>
+<p>We can also look at how continuous variables interact at different
+levels of a factor. The model plots predictions at 10 points along the x
+axis by default (you can specify different values if pred_values), and
+reports the probability that there is a non-zero slope to the lines. The
+plot below shows that there is strong evidence (98%) for a positive
+slope for age with addressable content, but weaker evidence (92%) for
+non-addressable content.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bayes_mm_interact.html">bayes_mm_interact</a></span><span class="op">(</span><span class="va">memory_bmm</span>, interacts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"adcon:age"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  ageEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |   age | Mean | Median.1 |       95% CI |     pd</span></span>
+<span><span class="co">#&gt; -------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | 18.00 | 0.63 |     0.63 | [0.39, 0.86] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 18.00 | 0.50 |     0.50 | [0.25, 0.74] | 99.92%</span></span>
+<span><span class="co">#&gt; addressable | 23.56 | 0.66 |     0.66 | [0.44, 0.88] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 23.56 | 0.53 |     0.53 | [0.30, 0.75] | 99.95%</span></span>
+<span><span class="co">#&gt; addressable | 29.11 | 0.70 |     0.70 | [0.49, 0.90] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 29.11 | 0.55 |     0.55 | [0.34, 0.76] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | 34.67 | 0.74 |     0.74 | [0.54, 0.94] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 34.67 | 0.58 |     0.58 | [0.37, 0.78] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | 40.22 | 0.77 |     0.77 | [0.58, 0.98] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 40.22 | 0.60 |     0.60 | [0.40, 0.80] |   100%</span></span>
+<span><span class="co">#&gt; addressable | 45.78 | 0.81 |     0.81 | [0.61, 1.02] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 45.78 | 0.63 |     0.63 | [0.43, 0.83] |   100%</span></span>
+<span><span class="co">#&gt; addressable | 51.33 | 0.85 |     0.85 | [0.64, 1.06] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 51.33 | 0.66 |     0.66 | [0.45, 0.86] |   100%</span></span>
+<span><span class="co">#&gt; addressable | 56.89 | 0.88 |     0.88 | [0.66, 1.11] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 56.89 | 0.68 |     0.68 | [0.47, 0.90] |   100%</span></span>
+<span><span class="co">#&gt; addressable | 62.44 | 0.92 |     0.92 | [0.68, 1.17] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 62.44 | 0.71 |     0.71 | [0.47, 0.94] |   100%</span></span>
+<span><span class="co">#&gt; addressable | 68.00 | 0.96 |     0.96 | [0.70, 1.22] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 68.00 | 0.74 |     0.74 | [0.48, 0.99] |   100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, age</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt;          Level1      Level2      age Difference       CI_low   CI_high      pd</span></span>
+<span><span class="co">#&gt;  1: addressable non_address 18.00000  0.1264642 -0.047321908 0.2914050 0.92425</span></span>
+<span><span class="co">#&gt;  2: addressable non_address 23.55556  0.1360867 -0.003699243 0.2728922 0.97200</span></span>
+<span><span class="co">#&gt;  3: addressable non_address 29.11111  0.1475801  0.037322980 0.2564829 0.99575</span></span>
+<span><span class="co">#&gt;  4: addressable non_address 34.66667  0.1587580  0.069222628 0.2481728 0.99975</span></span>
+<span><span class="co">#&gt;  5: addressable non_address 40.22222  0.1695947  0.087549217 0.2502301 1.00000</span></span>
+<span><span class="co">#&gt;  6: addressable non_address 45.77778  0.1802649  0.091300631 0.2675563 1.00000</span></span>
+<span><span class="co">#&gt;  7: addressable non_address 51.33333  0.1910884  0.080156774 0.3013144 0.99975</span></span>
+<span><span class="co">#&gt;  8: addressable non_address 56.88889  0.2012073  0.064330262 0.3413275 0.99800</span></span>
+<span><span class="co">#&gt;  9: addressable non_address 62.44444  0.2118106  0.044736292 0.3813729 0.99200</span></span>
+<span><span class="co">#&gt; 10: addressable non_address 68.00000  0.2223324  0.023800271 0.4274423 0.98500</span></span>
+<span><span class="co">#&gt;     ROPE_Percentage</span></span>
+<span><span class="co">#&gt;  1:      0.36868421</span></span>
+<span><span class="co">#&gt;  2:      0.28789474</span></span>
+<span><span class="co">#&gt;  3:      0.18315789</span></span>
+<span><span class="co">#&gt;  4:      0.07736842</span></span>
+<span><span class="co">#&gt;  5:      0.02000000</span></span>
+<span><span class="co">#&gt;  6:      0.01236842</span></span>
+<span><span class="co">#&gt;  7:      0.02763158</span></span>
+<span><span class="co">#&gt;  8:      0.04815789</span></span>
+<span><span class="co">#&gt;  9:      0.06973684</span></span>
+<span><span class="co">#&gt; 10:      0.09368421</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; $`adcon:age`</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-8-1.png" width="90%"></p>
+<p>We can split the data up further using the third factor. This shows a
+three way interaction, where the adcon:age relationship is split by tv.
+As well as reporting the MPE for the slope, the function has looked at
+the evidence for there being a difference at each of the 10 intervals on
+the x axis. If there is no evidence (MPE&lt;90) that there is a
+difference between conditions, it colours the region in grey. So the
+plot below shows that in the tv=choice condition on the left, there is
+no difference between addressability conditions for people under 30. But
+a difference emerges after that, since as people get older, there is
+strong evidence that their memory for addressable content gets better
+(98.8%), but no evidence (71.7%) for a memory effect with
+non-addressable content.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bayes_mm_interact.html">bayes_mm_interact</a></span><span class="op">(</span><span class="va">memory_bmm</span>, interacts <span class="op">=</span> <span class="st">"adcon:age:tv"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  age tvEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |     tv |   age | Mean | Median.1 |       95% CI |     pd</span></span>
+<span><span class="co">#&gt; ----------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | choice | 18.00 | 0.52 |     0.52 | [0.23, 0.80] | 99.90%</span></span>
+<span><span class="co">#&gt; non_address | choice | 18.00 | 0.56 |     0.56 | [0.26, 0.85] | 99.95%</span></span>
+<span><span class="co">#&gt; addressable | random | 18.00 | 0.73 |     0.73 | [0.45, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 18.00 | 0.44 |     0.44 | [0.15, 0.74] | 99.72%</span></span>
+<span><span class="co">#&gt; addressable | choice | 23.56 | 0.58 |     0.58 | [0.32, 0.83] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 23.56 | 0.57 |     0.57 | [0.31, 0.83] | 99.95%</span></span>
+<span><span class="co">#&gt; addressable | random | 23.56 | 0.75 |     0.75 | [0.50, 1.01] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 23.56 | 0.48 |     0.48 | [0.22, 0.74] | 99.90%</span></span>
+<span><span class="co">#&gt; addressable | choice | 29.11 | 0.64 |     0.64 | [0.40, 0.86] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 29.11 | 0.59 |     0.59 | [0.36, 0.82] | 99.95%</span></span>
+<span><span class="co">#&gt; addressable | random | 29.11 | 0.76 |     0.76 | [0.54, 1.00] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 29.11 | 0.52 |     0.52 | [0.28, 0.76] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | choice | 34.67 | 0.69 |     0.69 | [0.48, 0.90] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 34.67 | 0.60 |     0.60 | [0.39, 0.82] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 34.67 | 0.78 |     0.78 | [0.57, 1.00] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 34.67 | 0.55 |     0.55 | [0.33, 0.78] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | choice | 40.22 | 0.75 |     0.75 | [0.55, 0.96] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 40.22 | 0.62 |     0.62 | [0.41, 0.83] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 40.22 | 0.80 |     0.80 | [0.59, 1.01] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 40.22 | 0.59 |     0.59 | [0.38, 0.81] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 45.78 | 0.81 |     0.81 | [0.59, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 45.78 | 0.63 |     0.63 | [0.42, 0.86] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 45.78 | 0.81 |     0.81 | [0.60, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 45.78 | 0.63 |     0.63 | [0.41, 0.84] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 51.33 | 0.87 |     0.87 | [0.64, 1.11] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 51.33 | 0.65 |     0.65 | [0.41, 0.88] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 51.33 | 0.83 |     0.83 | [0.60, 1.06] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 51.33 | 0.66 |     0.66 | [0.44, 0.89] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 56.89 | 0.93 |     0.93 | [0.67, 1.19] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 56.89 | 0.67 |     0.67 | [0.40, 0.92] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 56.89 | 0.84 |     0.84 | [0.60, 1.10] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 56.89 | 0.70 |     0.70 | [0.45, 0.96] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 62.44 | 0.99 |     0.99 | [0.70, 1.28] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 62.44 | 0.68 |     0.68 | [0.38, 0.97] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 62.44 | 0.86 |     0.86 | [0.58, 1.15] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 62.44 | 0.73 |     0.73 | [0.45, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 68.00 | 1.05 |     1.05 | [0.72, 1.36] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 68.00 | 0.70 |     0.70 | [0.35, 1.03] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 68.00 | 0.87 |     0.87 | [0.57, 1.21] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 68.00 | 0.77 |     0.77 | [0.45, 1.10] |   100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, tv, age         Level1      Level2      age     tv   Difference      CI_low   CI_high</span></span>
+<span><span class="co">#&gt;  1: addressable non_address 18.00000 choice -0.037574935 -0.27151987 0.1960533</span></span>
+<span><span class="co">#&gt;  2: addressable non_address 23.55556 choice  0.004577391 -0.18145396 0.1956629</span></span>
+<span><span class="co">#&gt;  3: addressable non_address 29.11111 choice  0.046154927 -0.10308558 0.1958917</span></span>
+<span><span class="co">#&gt;  4: addressable non_address 34.66667 choice  0.089412610 -0.03266243 0.2149414</span></span>
+<span><span class="co">#&gt;  5: addressable non_address 40.22222 choice  0.132108023  0.01972414 0.2487241</span></span>
+<span><span class="co">#&gt;  6: addressable non_address 45.77778 choice  0.175108432  0.04956569 0.3058818</span></span>
+<span><span class="co">#&gt;  7: addressable non_address 51.33333 choice  0.218823580  0.06071879 0.3772217</span></span>
+<span><span class="co">#&gt;  8: addressable non_address 56.88889 choice  0.262539907  0.06285857 0.4606860</span></span>
+<span><span class="co">#&gt;  9: addressable non_address 62.44444 choice  0.303771562  0.06321008 0.5445978</span></span>
+<span><span class="co">#&gt; 10: addressable non_address 68.00000 choice  0.347034327  0.05796435 0.6353463</span></span>
+<span><span class="co">#&gt; 11: addressable non_address 18.00000 random  0.289304844  0.04545131 0.5398918</span></span>
+<span><span class="co">#&gt; 12: addressable non_address 23.55556 random  0.269186670  0.06809687 0.4723146</span></span>
+<span><span class="co">#&gt; 13: addressable non_address 29.11111 random  0.247918442  0.08772906 0.4087089</span></span>
+<span><span class="co">#&gt; 14: addressable non_address 34.66667 random  0.228183267  0.09991265 0.3565358</span></span>
+<span><span class="co">#&gt; 15: addressable non_address 40.22222 random  0.205564891  0.09285004 0.3200407</span></span>
+<span><span class="co">#&gt; 16: addressable non_address 45.77778 random  0.185805432  0.06186615 0.3083361</span></span>
+<span><span class="co">#&gt; 17: addressable non_address 51.33333 random  0.165394078  0.01420044 0.3138951</span></span>
+<span><span class="co">#&gt; 18: addressable non_address 56.88889 random  0.145071331 -0.04931798 0.3339513</span></span>
+<span><span class="co">#&gt; 19: addressable non_address 62.44444 random  0.124656003 -0.11834233 0.3570280</span></span>
+<span><span class="co">#&gt; 20: addressable non_address 68.00000 random  0.104003322 -0.18277513 0.3826699</span></span>
+<span><span class="co">#&gt;          pd ROPE_Percentage</span></span>
+<span><span class="co">#&gt;  1: 0.62500    0.5997368421</span></span>
+<span><span class="co">#&gt;  2: 0.52075    0.7342105263</span></span>
+<span><span class="co">#&gt;  3: 0.71725    0.7697368421</span></span>
+<span><span class="co">#&gt;  4: 0.92175    0.5715789474</span></span>
+<span><span class="co">#&gt;  5: 0.98900    0.2805263158</span></span>
+<span><span class="co">#&gt;  6: 0.99700    0.1086842105</span></span>
+<span><span class="co">#&gt;  7: 0.99750    0.0494736842</span></span>
+<span><span class="co">#&gt;  8: 0.99525    0.0344736842</span></span>
+<span><span class="co">#&gt;  9: 0.99400    0.0313157895</span></span>
+<span><span class="co">#&gt; 10: 0.99125    0.0255263158</span></span>
+<span><span class="co">#&gt; 11: 0.99025    0.0428947368</span></span>
+<span><span class="co">#&gt; 12: 0.99600    0.0247368421</span></span>
+<span><span class="co">#&gt; 13: 0.99850    0.0113157895</span></span>
+<span><span class="co">#&gt; 14: 0.99975    0.0002631579</span></span>
+<span><span class="co">#&gt; 15: 1.00000    0.0089473684</span></span>
+<span><span class="co">#&gt; 16: 0.99800    0.0657894737</span></span>
+<span><span class="co">#&gt; 17: 0.98350    0.1889473684</span></span>
+<span><span class="co">#&gt; 18: 0.92800    0.3173684211</span></span>
+<span><span class="co">#&gt; 19: 0.85000    0.4092105263</span></span>
+<span><span class="co">#&gt; 20: 0.75475    0.4292105263</span></span>
+<span><span class="co">#&gt; $`adcon:age:tv`</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-9-1.png" width="90%">
+We can get more fine grained information about those interval
+differences by displaying them all in a ladder with all the MPEs</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bayes_mm_interact.html">bayes_mm_interact</a></span><span class="op">(</span><span class="va">memory_bmm</span>, interacts <span class="op">=</span> <span class="st">"adcon:age:tv"</span>,ladder<span class="op">=</span><span class="cn">T</span>,ribbon<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  age tvEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |     tv |   age | Mean | Median.1 |       95% CI |     pd</span></span>
+<span><span class="co">#&gt; ----------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | choice | 18.00 | 0.52 |     0.52 | [0.23, 0.80] | 99.90%</span></span>
+<span><span class="co">#&gt; non_address | choice | 18.00 | 0.56 |     0.56 | [0.26, 0.85] | 99.95%</span></span>
+<span><span class="co">#&gt; addressable | random | 18.00 | 0.73 |     0.73 | [0.45, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 18.00 | 0.44 |     0.44 | [0.15, 0.74] | 99.72%</span></span>
+<span><span class="co">#&gt; addressable | choice | 23.56 | 0.58 |     0.58 | [0.32, 0.83] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 23.56 | 0.57 |     0.57 | [0.31, 0.83] | 99.95%</span></span>
+<span><span class="co">#&gt; addressable | random | 23.56 | 0.75 |     0.75 | [0.50, 1.01] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 23.56 | 0.48 |     0.48 | [0.22, 0.74] | 99.90%</span></span>
+<span><span class="co">#&gt; addressable | choice | 29.11 | 0.64 |     0.64 | [0.40, 0.86] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 29.11 | 0.59 |     0.59 | [0.36, 0.82] | 99.95%</span></span>
+<span><span class="co">#&gt; addressable | random | 29.11 | 0.76 |     0.76 | [0.54, 1.00] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 29.11 | 0.52 |     0.52 | [0.28, 0.76] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | choice | 34.67 | 0.69 |     0.69 | [0.48, 0.90] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 34.67 | 0.60 |     0.60 | [0.39, 0.82] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 34.67 | 0.78 |     0.78 | [0.57, 1.00] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 34.67 | 0.55 |     0.55 | [0.33, 0.78] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | choice | 40.22 | 0.75 |     0.75 | [0.55, 0.96] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 40.22 | 0.62 |     0.62 | [0.41, 0.83] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 40.22 | 0.80 |     0.80 | [0.59, 1.01] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 40.22 | 0.59 |     0.59 | [0.38, 0.81] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 45.78 | 0.81 |     0.81 | [0.59, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 45.78 | 0.63 |     0.63 | [0.42, 0.86] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 45.78 | 0.81 |     0.81 | [0.60, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 45.78 | 0.63 |     0.63 | [0.41, 0.84] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 51.33 | 0.87 |     0.87 | [0.64, 1.11] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 51.33 | 0.65 |     0.65 | [0.41, 0.88] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 51.33 | 0.83 |     0.83 | [0.60, 1.06] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 51.33 | 0.66 |     0.66 | [0.44, 0.89] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 56.89 | 0.93 |     0.93 | [0.67, 1.19] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 56.89 | 0.67 |     0.67 | [0.40, 0.92] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 56.89 | 0.84 |     0.84 | [0.60, 1.10] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 56.89 | 0.70 |     0.70 | [0.45, 0.96] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 62.44 | 0.99 |     0.99 | [0.70, 1.28] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 62.44 | 0.68 |     0.68 | [0.38, 0.97] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 62.44 | 0.86 |     0.86 | [0.58, 1.15] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 62.44 | 0.73 |     0.73 | [0.45, 1.03] |   100%</span></span>
+<span><span class="co">#&gt; addressable | choice | 68.00 | 1.05 |     1.05 | [0.72, 1.36] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | 68.00 | 0.70 |     0.70 | [0.35, 1.03] | 99.98%</span></span>
+<span><span class="co">#&gt; addressable | random | 68.00 | 0.87 |     0.87 | [0.57, 1.21] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random | 68.00 | 0.77 |     0.77 | [0.45, 1.10] |   100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, tv, age         Level1      Level2      age     tv   Difference      CI_low   CI_high</span></span>
+<span><span class="co">#&gt;  1: addressable non_address 18.00000 choice -0.037574935 -0.27151987 0.1960533</span></span>
+<span><span class="co">#&gt;  2: addressable non_address 23.55556 choice  0.004577391 -0.18145396 0.1956629</span></span>
+<span><span class="co">#&gt;  3: addressable non_address 29.11111 choice  0.046154927 -0.10308558 0.1958917</span></span>
+<span><span class="co">#&gt;  4: addressable non_address 34.66667 choice  0.089412610 -0.03266243 0.2149414</span></span>
+<span><span class="co">#&gt;  5: addressable non_address 40.22222 choice  0.132108023  0.01972414 0.2487241</span></span>
+<span><span class="co">#&gt;  6: addressable non_address 45.77778 choice  0.175108432  0.04956569 0.3058818</span></span>
+<span><span class="co">#&gt;  7: addressable non_address 51.33333 choice  0.218823580  0.06071879 0.3772217</span></span>
+<span><span class="co">#&gt;  8: addressable non_address 56.88889 choice  0.262539907  0.06285857 0.4606860</span></span>
+<span><span class="co">#&gt;  9: addressable non_address 62.44444 choice  0.303771562  0.06321008 0.5445978</span></span>
+<span><span class="co">#&gt; 10: addressable non_address 68.00000 choice  0.347034327  0.05796435 0.6353463</span></span>
+<span><span class="co">#&gt; 11: addressable non_address 18.00000 random  0.289304844  0.04545131 0.5398918</span></span>
+<span><span class="co">#&gt; 12: addressable non_address 23.55556 random  0.269186670  0.06809687 0.4723146</span></span>
+<span><span class="co">#&gt; 13: addressable non_address 29.11111 random  0.247918442  0.08772906 0.4087089</span></span>
+<span><span class="co">#&gt; 14: addressable non_address 34.66667 random  0.228183267  0.09991265 0.3565358</span></span>
+<span><span class="co">#&gt; 15: addressable non_address 40.22222 random  0.205564891  0.09285004 0.3200407</span></span>
+<span><span class="co">#&gt; 16: addressable non_address 45.77778 random  0.185805432  0.06186615 0.3083361</span></span>
+<span><span class="co">#&gt; 17: addressable non_address 51.33333 random  0.165394078  0.01420044 0.3138951</span></span>
+<span><span class="co">#&gt; 18: addressable non_address 56.88889 random  0.145071331 -0.04931798 0.3339513</span></span>
+<span><span class="co">#&gt; 19: addressable non_address 62.44444 random  0.124656003 -0.11834233 0.3570280</span></span>
+<span><span class="co">#&gt; 20: addressable non_address 68.00000 random  0.104003322 -0.18277513 0.3826699</span></span>
+<span><span class="co">#&gt;          pd ROPE_Percentage</span></span>
+<span><span class="co">#&gt;  1: 0.62500    0.5997368421</span></span>
+<span><span class="co">#&gt;  2: 0.52075    0.7342105263</span></span>
+<span><span class="co">#&gt;  3: 0.71725    0.7697368421</span></span>
+<span><span class="co">#&gt;  4: 0.92175    0.5715789474</span></span>
+<span><span class="co">#&gt;  5: 0.98900    0.2805263158</span></span>
+<span><span class="co">#&gt;  6: 0.99700    0.1086842105</span></span>
+<span><span class="co">#&gt;  7: 0.99750    0.0494736842</span></span>
+<span><span class="co">#&gt;  8: 0.99525    0.0344736842</span></span>
+<span><span class="co">#&gt;  9: 0.99400    0.0313157895</span></span>
+<span><span class="co">#&gt; 10: 0.99125    0.0255263158</span></span>
+<span><span class="co">#&gt; 11: 0.99025    0.0428947368</span></span>
+<span><span class="co">#&gt; 12: 0.99600    0.0247368421</span></span>
+<span><span class="co">#&gt; 13: 0.99850    0.0113157895</span></span>
+<span><span class="co">#&gt; 14: 0.99975    0.0002631579</span></span>
+<span><span class="co">#&gt; 15: 1.00000    0.0089473684</span></span>
+<span><span class="co">#&gt; 16: 0.99800    0.0657894737</span></span>
+<span><span class="co">#&gt; 17: 0.98350    0.1889473684</span></span>
+<span><span class="co">#&gt; 18: 0.92800    0.3173684211</span></span>
+<span><span class="co">#&gt; 19: 0.85000    0.4092105263</span></span>
+<span><span class="co">#&gt; 20: 0.75475    0.4292105263</span></span>
+<span><span class="co">#&gt; $`adcon:age:tv`</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-10-1.png" width="90%"></p>
+</div>
+<div class="section level2">
+<h2 id="bayes_mm-wrapper-function-to-run-and-analyse-data">Bayes_mm wrapper function to run and analyse data<a class="anchor" aria-label="anchor" href="#bayes_mm-wrapper-function-to-run-and-analyse-data"></a>
+</h2>
+<p>All the functions above can be carried out by a single, wrapper
+function, bayes_mm(). This will first run the model, then plot all the
+main effects and all the interactions. It will also output various model
+metrics that can be used in reporting, and plot the traces if asked.
+Here is an analysis for how people rated the adverts, run in one line.
+I’ve also asked for plots of the traces to check convergence. If you
+wanted to see more, you can use explore_browser=TRUE.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rating_bmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bayes_mm.html">bayes_mm</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>,dvname<span class="op">=</span><span class="st">"rating"</span>,conditions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"adcon"</span>,<span class="st">"dim"</span>,<span class="st">"tv"</span><span class="op">)</span>,groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pid"</span><span class="op">)</span>,plotcheck <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "running model"</span></span>
+<span><span class="co">#&gt; Bayes Mixed model on  rating  by  adcon dim tv  nested in  pid</span></span>
+<span><span class="co">#&gt; ================================================================================</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; stan_glmer</span></span>
+<span><span class="co">#&gt;  family:       gaussian [identity]</span></span>
+<span><span class="co">#&gt;  formula:      rating ~ adcon * dim * tv + (1 | pid)</span></span>
+<span><span class="co">#&gt;  observations: 804</span></span>
+<span><span class="co">#&gt; ------</span></span>
+<span><span class="co">#&gt;                                     Median MAD_SD</span></span>
+<span><span class="co">#&gt; (Intercept)                          1.8    0.4  </span></span>
+<span><span class="co">#&gt; adconnon_address                    -0.8    0.6  </span></span>
+<span><span class="co">#&gt; dimcruise                            0.4    0.5  </span></span>
+<span><span class="co">#&gt; dimdog                              -0.5    0.6  </span></span>
+<span><span class="co">#&gt; dimgames                             0.9    0.5  </span></span>
+<span><span class="co">#&gt; tvrandom                            -1.0    0.6  </span></span>
+<span><span class="co">#&gt; adconnon_address:dimcruise          -0.5    0.9  </span></span>
+<span><span class="co">#&gt; adconnon_address:dimdog             -0.6    0.9  </span></span>
+<span><span class="co">#&gt; adconnon_address:dimgames           -3.6    0.8  </span></span>
+<span><span class="co">#&gt; adconnon_address:tvrandom            0.7    0.8  </span></span>
+<span><span class="co">#&gt; dimcruise:tvrandom                   0.6    0.8  </span></span>
+<span><span class="co">#&gt; dimdog:tvrandom                      1.4    0.8  </span></span>
+<span><span class="co">#&gt; dimgames:tvrandom                    0.2    0.8  </span></span>
+<span><span class="co">#&gt; adconnon_address:dimcruise:tvrandom -1.2    1.3  </span></span>
+<span><span class="co">#&gt; adconnon_address:dimdog:tvrandom    -0.1    1.2  </span></span>
+<span><span class="co">#&gt; adconnon_address:dimgames:tvrandom   0.6    1.2  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Auxiliary parameter(s):</span></span>
+<span><span class="co">#&gt;       Median MAD_SD</span></span>
+<span><span class="co">#&gt; sigma 2.7    0.1   </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Error terms:</span></span>
+<span><span class="co">#&gt;  Groups   Name        Std.Dev.</span></span>
+<span><span class="co">#&gt;  pid      (Intercept) 2.0     </span></span>
+<span><span class="co">#&gt;  Residual             2.7     </span></span>
+<span><span class="co">#&gt; Num. levels: pid 201 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ------</span></span>
+<span><span class="co">#&gt; * For help interpreting the printed output see ?print.stanreg</span></span>
+<span><span class="co">#&gt; * For info on the priors used see ?prior_summary.stanreg</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Priors for model 'bmm' </span></span>
+<span><span class="co">#&gt; ------</span></span>
+<span><span class="co">#&gt; Intercept (after predictors centered)</span></span>
+<span><span class="co">#&gt;   Specified prior:</span></span>
+<span><span class="co">#&gt;     ~ normal(location = 0.89, scale = 2.5)</span></span>
+<span><span class="co">#&gt;   Adjusted prior:</span></span>
+<span><span class="co">#&gt;     ~ normal(location = 0.89, scale = 8.7)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients</span></span>
+<span><span class="co">#&gt;   Specified prior:</span></span>
+<span><span class="co">#&gt;     ~ normal(location = [0,0,0,...], scale = [2.5,2.5,2.5,...])</span></span>
+<span><span class="co">#&gt;   Adjusted prior:</span></span>
+<span><span class="co">#&gt;     ~ normal(location = [0,0,0,...], scale = [17.44,20.14,20.14,...])</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Auxiliary (sigma)</span></span>
+<span><span class="co">#&gt;   Specified prior:</span></span>
+<span><span class="co">#&gt;     ~ exponential(rate = 1)</span></span>
+<span><span class="co">#&gt;   Adjusted prior:</span></span>
+<span><span class="co">#&gt;     ~ exponential(rate = 0.29)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Covariance</span></span>
+<span><span class="co">#&gt;  ~ decov(reg. = 1, conc. = 1, shape = 1, scale = 1)</span></span>
+<span><span class="co">#&gt; ------</span></span>
+<span><span class="co">#&gt; See help('prior_summary.stanreg') for more details</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Parameter                           | Median |         95% CI |     pd |  Rhat |     ESS |                  Prior</span></span>
+<span><span class="co">#&gt; -----------------------------------------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; (Intercept)                         |   1.78 | [ 1.00,  2.57] |   100% | 1.002 | 1082.00 |  Normal (0.89 +- 8.73)</span></span>
+<span><span class="co">#&gt; adconnon_address                    |  -0.83 | [-1.99,  0.35] | 91.53% | 1.001 |  834.00 | Normal (0.00 +- 17.44)</span></span>
+<span><span class="co">#&gt; dimcruise                           |   0.42 | [-0.63,  1.51] | 77.75% | 1.001 | 1359.00 | Normal (0.00 +- 20.14)</span></span>
+<span><span class="co">#&gt; dimdog                              |  -0.49 | [-1.66,  0.64] | 79.67% | 1.001 | 1152.00 | Normal (0.00 +- 20.14)</span></span>
+<span><span class="co">#&gt; dimgames                            |   0.86 | [-0.15,  1.90] | 95.50% | 1.002 | 1265.00 | Normal (0.00 +- 20.14)</span></span>
+<span><span class="co">#&gt; tvrandom                            |  -1.02 | [-2.21,  0.18] | 95.58% | 1.002 |  873.00 | Normal (0.00 +- 17.45)</span></span>
+<span><span class="co">#&gt; adconnon_address:dimcruise          |  -0.45 | [-2.11,  1.19] | 69.90% | 1.001 | 1042.00 | Normal (0.00 +- 25.78)</span></span>
+<span><span class="co">#&gt; adconnon_address:dimdog             |  -0.62 | [-2.34,  1.10] | 76.58% | 1.000 |  912.00 | Normal (0.00 +- 25.99)</span></span>
+<span><span class="co">#&gt; adconnon_address:dimgames           |  -3.60 | [-5.25, -1.95] |   100% | 1.002 | 1059.00 | Normal (0.00 +- 26.54)</span></span>
+<span><span class="co">#&gt; adconnon_address:tvrandom           |   0.73 | [-0.93,  2.35] | 80.17% | 1.001 |  653.00 | Normal (0.00 +- 20.24)</span></span>
+<span><span class="co">#&gt; dimcruise:tvrandom                  |   0.64 | [-0.96,  2.19] | 78.33% | 1.001 | 1143.00 | Normal (0.00 +- 26.54)</span></span>
+<span><span class="co">#&gt; dimdog:tvrandom                     |   1.35 | [-0.24,  2.99] | 95.43% | 1.001 |  945.00 | Normal (0.00 +- 26.54)</span></span>
+<span><span class="co">#&gt; dimgames:tvrandom                   |   0.23 | [-1.35,  1.69] | 61.92% | 1.002 |  987.00 | Normal (0.00 +- 26.54)</span></span>
+<span><span class="co">#&gt; adconnon_address:dimcruise:tvrandom |  -1.16 | [-3.50,  1.22] | 82.40% | 1.000 |  895.00 | Normal (0.00 +- 35.46)</span></span>
+<span><span class="co">#&gt; adconnon_address:dimdog:tvrandom    |  -0.08 | [-2.61,  2.30] | 52.38% | 1.001 |  773.00 | Normal (0.00 +- 37.94)</span></span>
+<span><span class="co">#&gt; adconnon_address:dimgames:tvrandom  |   0.58 | [-1.74,  3.05] | 68.73% | 1.003 |  906.00 | Normal (0.00 +- 36.12)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Uncertainty intervals (equal-tailed) and p-values (two-tailed) computed</span></span>
+<span><span class="co">#&gt;   using a MCMC distribution approximation.</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects means:  adcon </span></span>
+<span><span class="co">#&gt; Estimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       | Mean |        95% CI |     pd</span></span>
+<span><span class="co">#&gt; -------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | 1.75 | [ 1.36, 2.12] |   100%</span></span>
+<span><span class="co">#&gt; non_address | 0.03 | [-0.37, 0.42] | 56.10%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects contrasts:  adcon </span></span>
+<span><span class="co">#&gt; Marginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 | Difference |       95% CI |   pd | % in ROPE</span></span>
+<span><span class="co">#&gt; ------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address |       1.72 | [1.35, 2.10] | 100% |        0%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects means:  dim </span></span>
+<span><span class="co">#&gt; Estimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; dim    | Mean |        95% CI |     pd</span></span>
+<span><span class="co">#&gt; --------------------------------------</span></span>
+<span><span class="co">#&gt; car    | 1.04 | [ 0.57, 1.52] |   100%</span></span>
+<span><span class="co">#&gt; cruise | 1.27 | [ 0.80, 1.73] |   100%</span></span>
+<span><span class="co">#&gt; dog    | 0.89 | [ 0.42, 1.34] | 99.95%</span></span>
+<span><span class="co">#&gt; games  | 0.36 | [-0.12, 0.82] | 93.12%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at dim</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects contrasts:  dim </span></span>
+<span><span class="co">#&gt; Marginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1 | Level2 | Difference |        95% CI |     pd | % in ROPE</span></span>
+<span><span class="co">#&gt; -----------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; car    | cruise |      -0.23 | [-0.75, 0.29] | 80.40% |    21.39%</span></span>
+<span><span class="co">#&gt; car    |    dog |       0.15 | [-0.37, 0.68] | 71.23% |    26.21%</span></span>
+<span><span class="co">#&gt; car    |  games |       0.68 | [ 0.18, 1.20] | 99.50% |        0%</span></span>
+<span><span class="co">#&gt; cruise |    dog |       0.38 | [-0.17, 0.91] | 91.20% |    11.58%</span></span>
+<span><span class="co">#&gt; cruise |  games |       0.91 | [ 0.39, 1.45] |   100% |        0%</span></span>
+<span><span class="co">#&gt; dog    |  games |       0.53 | [ 0.01, 1.06] | 97.70% |     2.97%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at dim</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects means:  tv </span></span>
+<span><span class="co">#&gt; Estimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; tv     | Mean |       95% CI |     pd</span></span>
+<span><span class="co">#&gt; -------------------------------------</span></span>
+<span><span class="co">#&gt; choice | 0.99 | [0.54, 1.44] |   100%</span></span>
+<span><span class="co">#&gt; random | 0.79 | [0.31, 1.27] | 99.95%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at tv</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Main effects contrasts:  tv </span></span>
+<span><span class="co">#&gt; Marginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1 | Level2 | Difference |        95% CI |     pd | % in ROPE</span></span>
+<span><span class="co">#&gt; -----------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; choice | random |       0.20 | [-0.45, 0.86] | 72.80% |    20.66%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at tv</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  dimEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |    dim |  Mean | Median.1 |         95% CI |     pd</span></span>
+<span><span class="co">#&gt; -----------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable |    car |  1.27 |     1.27 | [ 0.65,  1.89] |   100%</span></span>
+<span><span class="co">#&gt; non_address |    car |  0.81 |     0.81 | [ 0.16,  1.45] | 99.10%</span></span>
+<span><span class="co">#&gt; addressable | cruise |  2.01 |     2.01 | [ 1.39,  2.66] |   100%</span></span>
+<span><span class="co">#&gt; non_address | cruise |  0.52 |     0.52 | [-0.08,  1.13] | 95.17%</span></span>
+<span><span class="co">#&gt; addressable |    dog |  1.47 |     1.47 | [ 0.82,  2.11] |   100%</span></span>
+<span><span class="co">#&gt; non_address |    dog |  0.31 |     0.31 | [-0.32,  0.93] | 83.60%</span></span>
+<span><span class="co">#&gt; addressable |  games |  2.24 |     2.24 | [ 1.62,  2.85] |   100%</span></span>
+<span><span class="co">#&gt; non_address |  games | -1.53 |    -1.53 | [-2.14, -0.90] |   100%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, dim</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interations: contrasts between levels of   adcon  within levels of  dimMarginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 |    dim | Difference |        95% CI |     pd | % in ROPE</span></span>
+<span><span class="co">#&gt; ------------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address |    car |       0.47 | [-0.40, 1.28] | 86.17% |    11.37%</span></span>
+<span><span class="co">#&gt; addressable | non_address | cruise |       1.49 | [ 0.67, 2.33] | 99.98% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |    dog |       1.15 | [ 0.33, 2.00] | 99.65% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |  games |       3.77 | [ 2.95, 4.60] |   100% |        0%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  tvEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |     tv |      Mean |  Median.1 |        95% CI |     pd</span></span>
+<span><span class="co">#&gt; ---------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | choice |      1.99 |      1.99 | [ 1.46, 2.52] |   100%</span></span>
+<span><span class="co">#&gt; non_address | choice | -7.25e-03 | -7.25e-03 | [-0.54, 0.52] | 51.28%</span></span>
+<span><span class="co">#&gt; addressable | random |      1.52 |      1.52 | [ 0.96, 2.05] |   100%</span></span>
+<span><span class="co">#&gt; non_address | random |      0.06 |      0.06 | [-0.50, 0.60] | 59.40%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, tv</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interations: contrasts between levels of   adcon  within levels of  tvMarginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 |     tv | Difference |       95% CI |   pd | % in ROPE</span></span>
+<span><span class="co">#&gt; ---------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address | choice |       1.99 | [1.48, 2.52] | 100% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address | random |       1.45 | [0.91, 1.98] | 100% |        0%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span>
+<span><span class="co">#&gt; NOTE: Results may be misleading due to involvement in interactions</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  dim tvEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |    dim |     tv |  Mean | Median.1 |         95% CI |     pd</span></span>
+<span><span class="co">#&gt; --------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable |    car | choice |  1.78 |     1.78 | [ 1.00,  2.57] |   100%</span></span>
+<span><span class="co">#&gt; non_address |    car | choice |  0.96 |     0.96 | [ 0.04,  1.92] | 98.02%</span></span>
+<span><span class="co">#&gt; addressable | cruise | choice |  2.21 |     2.21 | [ 1.33,  3.12] |   100%</span></span>
+<span><span class="co">#&gt; non_address | cruise | choice |  0.94 |     0.94 | [ 0.10,  1.77] | 98.67%</span></span>
+<span><span class="co">#&gt; addressable |    dog | choice |  1.29 |     1.29 | [ 0.39,  2.25] | 99.85%</span></span>
+<span><span class="co">#&gt; non_address |    dog | choice | -0.15 |    -0.15 | [-1.00,  0.60] | 64.83%</span></span>
+<span><span class="co">#&gt; addressable |  games | choice |  2.65 |     2.65 | [ 1.82,  3.48] |   100%</span></span>
+<span><span class="co">#&gt; non_address |  games | choice | -1.77 |    -1.77 | [-2.65, -0.90] |   100%</span></span>
+<span><span class="co">#&gt; addressable |    car | random |  0.75 |     0.75 | [-0.16,  1.65] | 94.73%</span></span>
+<span><span class="co">#&gt; non_address |    car | random |  0.66 |     0.66 | [-0.24,  1.54] | 93.03%</span></span>
+<span><span class="co">#&gt; addressable | cruise | random |  1.82 |     1.82 | [ 0.90,  2.74] |   100%</span></span>
+<span><span class="co">#&gt; non_address | cruise | random |  0.10 |     0.10 | [-0.76,  0.95] | 59.30%</span></span>
+<span><span class="co">#&gt; addressable |    dog | random |  1.65 |     1.65 | [ 0.77,  2.45] | 99.98%</span></span>
+<span><span class="co">#&gt; non_address |    dog | random |  0.78 |     0.78 | [-0.15,  1.73] | 94.67%</span></span>
+<span><span class="co">#&gt; addressable |  games | random |  1.84 |     1.84 | [ 0.92,  2.71] |   100%</span></span>
+<span><span class="co">#&gt; non_address |  games | random | -1.28 |    -1.28 | [-2.16, -0.40] | 99.75%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, dim, tv</span></span>
+<span><span class="co">#&gt; Interations: contrasts between levels of   adcon  within levels of  dim tvMarginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 |    dim |     tv | Difference |        95% CI |     pd | % in ROPE</span></span>
+<span><span class="co">#&gt; ---------------------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address |    car | choice |       0.83 | [-0.35, 1.99] | 91.53% |     5.66%</span></span>
+<span><span class="co">#&gt; addressable | non_address | cruise | choice |       1.27 | [ 0.14, 2.43] | 98.40% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |    dog | choice |       1.45 | [ 0.27, 2.63] | 99.12% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |  games | choice |       4.42 | [ 3.34, 5.58] |   100% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |    car | random |       0.10 | [-1.12, 1.28] | 57.77% |    14.92%</span></span>
+<span><span class="co">#&gt; addressable | non_address | cruise | random |       1.72 | [ 0.54, 2.89] | 99.80% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |    dog | random |       0.85 | [-0.34, 2.05] | 91.62% |     5.13%</span></span>
+<span><span class="co">#&gt; addressable | non_address |  games | random |       3.11 | [ 1.96, 4.30] |   100% |        0%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-11-1.png" width="90%"></p>
+<pre><code><span><span class="co">#&gt; $`adcon:dim`</span></span></code></pre>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-11-2.png" width="90%"></p>
+<pre><code><span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`adcon:tv`</span></span></code></pre>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-11-3.png" width="90%"></p>
+<pre><code><span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $`adcon:dim:tv`</span></span></code></pre>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-11-4.png" width="90%"></p>
+<p>Since we have saved the output of the model, we can then do follow up
+analyses to replot and look at things of interest, by passing the model
+back through one of our plotting functions. Here’s the three way
+interaction:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/bayes_mm_interact.html">bayes_mm_interact</a></span><span class="op">(</span><span class="va">rating_bmm</span>,interacts <span class="op">=</span> <span class="st">"adcon:dim:tv"</span>,violin<span class="op">=</span><span class="cn">F</span>,contrast_sparkline <span class="op">=</span> <span class="cn">T</span>,show_mpe  <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Interactions: means of levels of   adcon  within levels of  dim tvEstimated Marginal Means</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; adcon       |    dim |     tv |  Mean | Median.1 |         95% CI |     pd</span></span>
+<span><span class="co">#&gt; --------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable |    car | choice |  1.78 |     1.78 | [ 1.00,  2.57] |   100%</span></span>
+<span><span class="co">#&gt; non_address |    car | choice |  0.96 |     0.96 | [ 0.04,  1.92] | 98.02%</span></span>
+<span><span class="co">#&gt; addressable | cruise | choice |  2.21 |     2.21 | [ 1.33,  3.12] |   100%</span></span>
+<span><span class="co">#&gt; non_address | cruise | choice |  0.94 |     0.94 | [ 0.10,  1.77] | 98.67%</span></span>
+<span><span class="co">#&gt; addressable |    dog | choice |  1.29 |     1.29 | [ 0.39,  2.25] | 99.85%</span></span>
+<span><span class="co">#&gt; non_address |    dog | choice | -0.15 |    -0.15 | [-1.00,  0.60] | 64.83%</span></span>
+<span><span class="co">#&gt; addressable |  games | choice |  2.65 |     2.65 | [ 1.82,  3.48] |   100%</span></span>
+<span><span class="co">#&gt; non_address |  games | choice | -1.77 |    -1.77 | [-2.65, -0.90] |   100%</span></span>
+<span><span class="co">#&gt; addressable |    car | random |  0.75 |     0.75 | [-0.16,  1.65] | 94.73%</span></span>
+<span><span class="co">#&gt; non_address |    car | random |  0.66 |     0.66 | [-0.24,  1.54] | 93.03%</span></span>
+<span><span class="co">#&gt; addressable | cruise | random |  1.82 |     1.82 | [ 0.90,  2.74] |   100%</span></span>
+<span><span class="co">#&gt; non_address | cruise | random |  0.10 |     0.10 | [-0.76,  0.95] | 59.30%</span></span>
+<span><span class="co">#&gt; addressable |    dog | random |  1.65 |     1.65 | [ 0.77,  2.45] | 99.98%</span></span>
+<span><span class="co">#&gt; non_address |    dog | random |  0.78 |     0.78 | [-0.15,  1.73] | 94.67%</span></span>
+<span><span class="co">#&gt; addressable |  games | random |  1.84 |     1.84 | [ 0.92,  2.71] |   100%</span></span>
+<span><span class="co">#&gt; non_address |  games | random | -1.28 |    -1.28 | [-2.16, -0.40] | 99.75%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal means estimated at adcon, dim, tv</span></span>
+<span><span class="co">#&gt; Interations: contrasts between levels of   adcon  within levels of  dim tvMarginal Contrasts Analysis</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Level1      |      Level2 |    dim |     tv | Difference |        95% CI |     pd | % in ROPE</span></span>
+<span><span class="co">#&gt; ---------------------------------------------------------------------------------------------</span></span>
+<span><span class="co">#&gt; addressable | non_address |    car | choice |       0.83 | [-0.35, 1.99] | 91.53% |     5.66%</span></span>
+<span><span class="co">#&gt; addressable | non_address | cruise | choice |       1.27 | [ 0.14, 2.43] | 98.40% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |    dog | choice |       1.45 | [ 0.27, 2.63] | 99.12% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |  games | choice |       4.42 | [ 3.34, 5.58] |   100% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |    car | random |       0.10 | [-1.12, 1.28] | 57.77% |    14.92%</span></span>
+<span><span class="co">#&gt; addressable | non_address | cruise | random |       1.72 | [ 0.54, 2.89] | 99.80% |        0%</span></span>
+<span><span class="co">#&gt; addressable | non_address |    dog | random |       0.85 | [-0.34, 2.05] | 91.62% |     5.13%</span></span>
+<span><span class="co">#&gt; addressable | non_address |  games | random |       3.11 | [ 1.96, 4.30] |   100% |        0%</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Marginal contrasts estimated at adcon</span></span>
+<span><span class="co">#&gt; $`adcon:dim:tv`</span></span></code></pre></div>
+<p><img src="eyethinkbayes-vignette_files/figure-html/unnamed-chunk-12-1.png" width="90%"></p>
+<p>If you run into any problems, please raise an issue with github!</p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
