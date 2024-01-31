@@ -59,11 +59,6 @@ Here, the MPE is given inbetween the two plots, and is the probability that ther
  bayes_mm_mainFX(bmm = memory_bmm,mainfxs = c("adcon","tv"),bars=T,violin=F,contrast_sparkline = T,show_mpe = F,show_preddist = F)
 ```
 
-The final factor in this model is continuous: participant age. We can plot that too, with the MPE reported for a non-zero slope
-
-```{r out.width = "90%", fig.width =6,fig.height =4}
-bayes_mm_mainFX(bmm = memory_bmm,mainfxs = c("age"))
-```
 
 ## Interactions
 
