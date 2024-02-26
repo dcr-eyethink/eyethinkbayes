@@ -1,7 +1,7 @@
 Package: eyethinkbayes
 Type: Package
 Title: Bayesian analysis for eyethink lab data
-Version: 0.2.1
+Version: 0.2.2
 Author: person("Daniel","C." "Richardson",
   email = "dcr@eyethink.org",
   role = c("aut", "cre"),

@@ -22,4 +22,4 @@ functions. You can access this in R with
 vignette("eyethinkbayes_vignette",package = "eyethinkbayes")
 ```
 
-You can also read this vignette [online at the github website](https://dcr-eyethink.github.io/eyethinkbayes/articles/eyethinkbayes_vignette.html).
+You can also read this vignette [online at the github website](https://dcr-eyethink.github.io/eyethinkbayes/articles/eyethinkbayes-vignette.html).

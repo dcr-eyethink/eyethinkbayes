@@ -1,4 +1,4 @@
-bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=NULL,
+bayes_mm_interact <- function(bmm,interacts=NULL,title=NULL,pred_values=NULL,
                               ribbon=T,ladder=F,spark=F,slope_mpes=T,mfx_sideplot=F,ylim=NULL,
                               contrast_sparkline=F, show_mpe=T,show_preddist=T,
                               ...){
@@ -19,6 +19,8 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
   if (names(bmm[1])=="bmm"){bmm <- bmm$bmm}
 
   if(is.null(interacts)){interacts <- insight::find_interactions(bmm)$conditional}
+
+  binom <- ifelse ( family(bmm)$family=="binomial",T,F)
 
 
   data <- bmm$data
@@ -196,7 +198,10 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
       cat("\nInteractions: means of levels of  ", i[1], " within levels of ",i[-1])
       print(means)
       setDT(means)
-      setnames(means,"Mean",dvname)
+      if (binom){setnames(means,"Probability",dvname)}else{
+        setnames(means,"Mean",dvname)
+      }
+
       #clipr::write_clip(means)
 
       cons <-  modelbased::estimate_contrasts(bmm,contrast = i[1],at=i[-1])
@@ -213,6 +218,8 @@ bayes_mm_interact <- function(bmm,interacts=NULL,binom=F,title=NULL,pred_values=
       ## get post distributions
       if (show_preddist){
       post <- data.table(as.matrix(emmeans::as.mcmc.emmGrid(bmm_fx)))
+      if (binom){post <- data.table( psych::logistic(post) )}
+
       post <- melt(post,measure.vars = colnames(post),value.name = dvname)
       post[,c(i):=tstrsplit(variable,split=" ")[seq(from=2, to=(2*length(i)), by=2)],by=variable]
 }else{post <- NULL}

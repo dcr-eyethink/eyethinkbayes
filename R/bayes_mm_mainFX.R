@@ -33,11 +33,13 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,
     #means tables
 
     means <- suppressWarnings(modelbased::estimate_means(model = bmm,at=cond))
+
     cat("\nMain effects means: ", cond,"\n")
     print(means)
     setDT(means)
     cat("\n")
 
+    if (binom){setnames(means,"Probability","Mean")}
 
     if (is.factor(data[[cond]])) {
 ##########################################
@@ -65,7 +67,7 @@ bayes_mm_mainFX <- function(bmm,mainfxs=NULL,title=NULL,contrast_sparkline=F,
 
       ## gather mean estimates
       m <- rbind(m,data.frame(condition=cond,levels=means[[cond]],mean=means$Mean))
-      if(binom){m$Median <- psych::logistic(m$mean)}
+     # if(binom){m$Median <- psych::logistic(m$mean)}
 
       ## if there are only 2 levels, then we can gather mpes to put on a plot
       if (length(unique(data[[cond]]))<3){
