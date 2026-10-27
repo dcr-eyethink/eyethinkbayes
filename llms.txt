@@ -1,0 +1,50 @@
+# README eyethink bayes
+
+2024-01-23
+
+## Eyethink Bayes analysis tools
+
+This is a toolbox for running Bayesian mixed models. It is part of the
+eyethink toolbox and requires the [eyethinkdata
+package](https://dcr-eyethink.github.io/eyethinkdata/).
+
+It will run a Baysian mixed model using rstanarm, output metrics and
+plots for the main effects and interactions.
+
+Use the code below to install or update from github
+
+``` r
+
+devtools::install_github("dcr-eyethink/eyethinkbayes")
+library(eyethinkbayes)
+```
+
+There is a vignette walk through using the package and some of its
+functions. You can access this in R with
+
+``` r
+
+vignette("eyethinkbayes_vignette",package = "eyethinkbayes")
+```
+
+You can also read this vignette [online at the github
+website](https://dcr-eyethink.github.io/eyethinkbayes/articles/eyethinkbayes-vignette.html).
+
+# Package index
+
+## All functions
+
+- [`bayes_mm()`](https://dcr-eyethink.github.io/eyethinkbayes/reference/bayes_mm.md)
+  : Run, analyse and plot a Bayesian mixed model in one step
+- [`bayes_mm_interact()`](https://dcr-eyethink.github.io/eyethinkbayes/reference/bayes_mm_interact.md)
+  : Plot and report the interactions from a Bayesian mixed model
+- [`bayes_mm_mainFX()`](https://dcr-eyethink.github.io/eyethinkbayes/reference/bayes_mm_mainFX.md)
+  : Plot and report the main effects from a Bayesian mixed model
+- [`bayes_mm_run()`](https://dcr-eyethink.github.io/eyethinkbayes/reference/bayes_mm_run.md)
+  : Run a Bayesian hierarchical mixed model
+
+# Articles
+
+### All vignettes
+
+- [eyethinkbayes-vignette](https://dcr-eyethink.github.io/eyethinkbayes/articles/eyethinkbayes-vignette.md):

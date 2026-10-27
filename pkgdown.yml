@@ -1,10 +1,9 @@
-pandoc: 2.19.2
-pkgdown: 2.0.7
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   eyethinkbayes-vignette: eyethinkbayes-vignette.html
-last_built: 2024-02-26T16:18Z
+last_built: 2026-10-27T06:17Z
 urls:
   reference: https://dcr-eyethink.github.io/eyethinkbayes/reference
   article: https://dcr-eyethink.github.io/eyethinkbayes/articles
-
