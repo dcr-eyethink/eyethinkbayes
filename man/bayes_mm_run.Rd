@@ -2,8 +2,7 @@
 % Please edit documentation in R/bayes_mm_run.R
 \name{bayes_mm_run}
 \alias{bayes_mm_run}
-\title{Runs Bayesian hierarchical mixed model with up to three conditions
-and nested factors (groups).Uses rstanarm}
+\title{Run a Bayesian hierarchical mixed model}
 \usage{
 bayes_mm_run(
   data,
@@ -19,30 +18,67 @@ bayes_mm_run(
 )
 }
 \arguments{
-\item{data}{data in long format}
+\item{data}{The data in long format, with a row for each observation.}
 
-\item{dvname}{column name for DV}
+\item{dvname}{The name of the column with the dependent variable.}
 
-\item{conditions}{up to 3 conditions}
+\item{conditions}{A vector of up to three names of columns, the fixed effects.
+Factors (or text) and numeric variables can be used.}
 
-\item{groups}{a set of random factors}
+\item{groups}{A vector of names of columns with the grouping factors for the
+random effects, eg "pid".}
 
-\item{f}{formula, if omitted this will be generated for you}
+\item{f}{A model formula (as text) to use instead of making one from
+\code{conditions} and \code{groups}.}
 
-\item{mmtype}{default to random intercepts, but can have 'slopes' too}
+\item{mmtype}{"intercept" (the default) for random intercepts, or "slopes" to
+have random slopes too.}
 
-\item{binom}{If true uses the binomial / logit family}
+\item{binom}{If \code{TRUE}, the dv is modelled as binomial, with a logit link
+(for 0/1 data). The default is a normal (gaussian) model.}
 
-\item{adapt_delta}{defults to 0.8, but can get closer to 1 if convergences probs}
+\item{adapt_delta}{Defaults to 0.8. Raise it towards 1 if the model has
+convergence problems (it is slower).}
 
-\item{explore_browser}{launch a browser interface to explore model (uses shinystan)}
+\item{explore_browser}{If \code{TRUE}, open a browser window to explore the model
+with \code{shinystan}.}
 
-\item{iter}{iterations for the model to run}
+\item{iter}{The number of iterations for each chain. Default 2000.}
 }
 \value{
-Returns the bayes model
+The model, a stanreg object from \code{rstanarm}. Pass it to
+\code{\link[=bayes_mm]{bayes_mm()}}, \code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}} or \code{\link[=bayes_mm_interact]{bayes_mm_interact()}}.
 }
 \description{
-Runs Bayesian hierarchical mixed model with up to three conditions
-and nested factors (groups).Uses rstanarm
+Runs a Bayesian mixed model with up to three conditions as fixed effects and
+any number of grouping factors (such as participants) as random effects,
+using the \code{rstanarm} package. You give it the names of the columns and it
+writes the model formula for you. This can take a few minutes.
+}
+\details{
+All of the conditions are crossed (\code{a * b * c}), and a random effect is added
+for each of the groups. With the default \code{mmtype = "intercept"} each group
+gets a random intercept (\code{(1 | pid)}); with "slopes" each group also gets
+random slopes for the conditions (\code{(1 + a + b | pid)}).
+
+To avoid problems later on, punctuation and spaces in the names of the
+conditions, and in the levels of any condition that is a factor or text, are
+replaced by underscores (so "Not addressable" becomes "Not_addressable"), and
+text columns are turned into factors. This is done to a copy of your data, which
+is stored in the model (\code{bmm$data}). The \code{conditions} are cleaned in the same
+way, so when you ask for plots, use the cleaned names.
+
+The model is run with the default priors of \code{rstanarm::stan_glmer}. The
+function also sets the R option \code{mc.cores} to the number of cores on your
+computer, so that the chains run in parallel.
+}
+\examples{
+\dontrun{
+bmm <- bayes_mm_run(data = ad_data, dvname = "dprime",
+                    conditions = c("adcon", "age", "tv"),
+                    groups = c("pid", "dim"))
+}
+}
+\seealso{
+\code{\link[=bayes_mm]{bayes_mm()}}
 }

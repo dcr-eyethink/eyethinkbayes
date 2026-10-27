@@ -2,27 +2,80 @@
 % Please edit documentation in R/bayes_mm.R
 \name{bayes_mm}
 \alias{bayes_mm}
-\title{Wrapper function for a bayesian mixed model, analysis and plots
-can be given an already generated model, or will run it
-with data and specified dvname, conditions and groups
-In ... can pass variables to other bayes functions, and pirateye for plotting}
+\title{Run, analyse and plot a Bayesian mixed model in one step}
 \usage{
 bayes_mm(bmm = list(), outp = "analysis", title = NULL, plotcheck = F, ...)
 }
 \arguments{
-\item{bmm}{if not supplied, need model specs in ... if supplied just the analysis will be run}
+\item{bmm}{A model that you have already run, either the output of
+\code{\link[=bayes_mm_run]{bayes_mm_run()}} or the list returned by this function. If it is not given
+(the default), a new model is run using the arguments in \code{...}.}
 
-\item{outp}{folder name for output, or NULL to stop}
+\item{outp}{The name of a folder in which to save the text report and the
+plots as pdfs (it is created if needed). Set to \code{NULL} or "" to not save
+anything.}
 
-\item{title}{for output files and plots}
+\item{title}{Extra text to add to the plot titles and the report file name.}
 
-\item{plotcheck}{plots traces to check}
+\item{plotcheck}{If \code{TRUE}, also return plots to check the model: the traces
+of the chains, a posterior check of the mean, and a posterior check of the
+density of the data.}
 
-\item{...}{parameters for running a new model with \code{\link{bayes_mm_run}}, eg data, dvname, conditions, groups. Or for plotting with pirateye. Can also model with explore_browser=T}
+\item{...}{Arguments for \code{\link[=bayes_mm_run]{bayes_mm_run()}} (\code{data}, \code{dvname}, \code{conditions},
+\code{groups}, \code{binom}, \code{iter} etc.) if a model is to be run, and/or for
+\code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}}, \code{\link[=bayes_mm_interact]{bayes_mm_interact()}} and \code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}} for
+plotting.}
+}
+\value{
+A list with:
+\describe{
+\item{bmm}{the model (a stanreg object), which you can pass back to the
+plotting functions}
+\item{mainFX}{output of \code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}}}
+\item{interactFX}{the plots from \code{\link[=bayes_mm_interact]{bayes_mm_interact()}}, or \code{NULL} if there
+was only one condition}
+\item{plotcheck_plots}{the check plots, if \code{plotcheck = TRUE}}
+\item{param}{the table of model parameters}
+}
 }
 \description{
-Wrapper function for a bayesian mixed model, analysis and plots
-can be given an already generated model, or will run it
-with data and specified dvname, conditions and groups
-In ... can pass variables to other bayes functions, and pirateye for plotting
+A wrapper that runs a Bayesian mixed model (or takes one you have already
+run), prints a report of the model, and then plots all of the main effects
+and all of the interactions. It is the quickest way to analyse a data set; the
+functions it calls (\code{\link[=bayes_mm_run]{bayes_mm_run()}}, \code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}} and
+\code{\link[=bayes_mm_interact]{bayes_mm_interact()}}) can also be used on their own, for more control.
+}
+\details{
+\strong{The report.} The model, its priors, and a table of parameters (from
+\code{parameters::model_parameters}) are printed to the console, followed by the
+means and contrasts for the main effects and interactions. If \code{outp} is a
+folder name, the same text is also saved to a file in that folder called
+\verb{<dv> <conditions>BayesMM <title>.txt}.
+
+\strong{The plots.} All the main effects are plotted by \code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}}. If
+there is more than one condition, the interactions are plotted by
+\code{\link[=bayes_mm_interact]{bayes_mm_interact()}}: the first condition with each of the others, and then
+all of them together. The plots are drawn by \code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}}, and are
+saved as pdfs in the \code{outp} folder.
+
+\strong{Passing arguments.} If you supply \code{bmm}, everything in \code{...} goes to the
+plotting functions, so you can use any argument of \code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}},
+\code{\link[=bayes_mm_interact]{bayes_mm_interact()}} or \code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}} (eg \code{bars = TRUE}). If you
+want \code{\link[=bayes_mm]{bayes_mm()}} to run the model for you, then \code{...} must contain the
+arguments for \code{\link[=bayes_mm_run]{bayes_mm_run()}} (\code{data}, \code{dvname}, \code{conditions}, \code{groups} and so
+on); these are also passed to the plotting functions, which ignore them.
+Because \code{\link[=bayes_mm_run]{bayes_mm_run()}} does not accept plotting arguments, it is best to
+run the model first with \code{\link[=bayes_mm_run]{bayes_mm_run()}} if you want to customise the plots.
+}
+\examples{
+\dontrun{
+res <- bayes_mm(data = ad_data, dvname = "rating",
+                conditions = c("adcon", "dim", "tv"), groups = "pid",
+                plotcheck = TRUE)
+# replot, using the model that was returned
+bayes_mm_interact(res, interacts = "adcon:dim:tv", violin = FALSE)
+}
+}
+\seealso{
+\code{\link[=bayes_mm_run]{bayes_mm_run()}}, \code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}}, \code{\link[=bayes_mm_interact]{bayes_mm_interact()}}
 }

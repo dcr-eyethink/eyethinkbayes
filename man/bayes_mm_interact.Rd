@@ -2,12 +2,11 @@
 % Please edit documentation in R/bayes_mm_interact.R
 \name{bayes_mm_interact}
 \alias{bayes_mm_interact}
-\title{Output plot and means table for interactions. Can plot discrete or continuous factors. Can be passed plotting variables for pirateye}
+\title{Plot and report the interactions from a Bayesian mixed model}
 \usage{
 bayes_mm_interact(
   bmm,
   interacts = NULL,
-  binom = F,
   title = NULL,
   pred_values = NULL,
   ribbon = T,
@@ -23,26 +22,86 @@ bayes_mm_interact(
 )
 }
 \arguments{
-\item{bmm}{needs a bayes mixed model object (or a list with one at start)}
+\item{bmm}{A model from \code{\link[=bayes_mm_run]{bayes_mm_run()}} (or the list returned by
+\code{\link[=bayes_mm]{bayes_mm()}}).}
 
-\item{interacts}{interactions you want to plot with : separating, gives all if void. Remember that punctuation gets stripped from condition names}
+\item{interacts}{The interactions to plot, as a vector of text with the
+conditions separated by ":", eg \code{c("adcon:tv", "adcon:age:tv")}. If missing,
+all of the interactions in the model are plotted. Remember that punctuation
+is replaced by underscores in the names of conditions.}
 
-\item{pred_values}{for continuous variables, a vector of values where predictions are made. Defaults to 10 equally spaced steps}
+\item{title}{Extra text for the title of the plot (and the file name).}
 
-\item{ribbon}{for continuous variables, shades area where no evidence lines are different}
+\item{pred_values}{For continuous variables, a vector of values at which to
+make predictions. Default is 10 equally spaced values.}
 
-\item{ladder}{for continuous variables, writes MPEs at each predicted value}
+\item{ribbon}{For continuous variables, shade the region where there is no
+evidence that the lines differ?}
 
-\item{spark}{for continuous variables,plots the MPEs at each predicted value below main plot}
+\item{ladder}{For continuous variables, write the MPE for the difference
+between lines at each predicted value?}
 
-\item{contrast_sparkline}{show distribution of contrast estimate below plot}
+\item{spark}{For continuous variables, plot the MPEs at each predicted value in
+a panel below?}
 
-\item{show_mpe}{report the mpes between pairs of mean estimates for the first names condition}
+\item{slope_mpes}{For continuous variables, write the MPE for each slope on the
+plot?}
 
-\item{show_preddist}{show distributions for the mean estimates}
+\item{mfx_sideplot}{For continuous variables with a two level first factor, add
+a small plot on the left of the posterior distributions of the main effect of
+that factor.}
 
-\item{...}{pirateye plotting parameters}
+\item{ylim}{Limits for the y axis, as a vector of two numbers.}
+
+\item{contrast_sparkline}{For factors, show the distribution of the contrast
+estimates below the plot?}
+
+\item{show_mpe}{For factors, write the MPEs on the plot?}
+
+\item{show_preddist}{For factors, show the posterior distributions of the
+means?}
+
+\item{...}{Further arguments for \code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}}, eg \code{bars = TRUE},
+\code{violin = FALSE}, and \code{outp} to change where the pdf is saved (\code{outp = ""} to not save it).}
+}
+\value{
+A named list of plots, one for each interaction (named like
+"adcon:tv").
 }
 \description{
-Output plot and means table for interactions. Can plot discrete or continuous factors. Can be passed plotting variables for pirateye
+For each interaction you ask for, prints a table of the estimated means and
+contrasts, and draws a plot of the estimated means with their posterior
+distributions. Works for interactions between factors, and for interactions
+between one continuous variable and one or two factors. Any arguments of
+\code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}} can be passed in to change the plot.
+}
+\details{
+The order of the conditions in an interaction matters. The first is used for
+the colour split, the second for the x axis, and the third, if there is one,
+splits the plot into panels. The MPEs shown on the plot (the probability that
+there is a difference) are for the effect of the first condition at each level
+of the others.
+
+\strong{Factors only.} The estimated means are shown with the distributions of the
+estimates as split violins, and with the MPE for the difference between the
+colour conditions at each x position.
+
+\strong{One continuous variable.} Predictions are plotted as lines at \code{pred_values}
+points along the x axis (by default 10 equally spaced points), and the MPE
+that the slope of each line is not zero is shown. If the first factor has two
+levels, the area where there is no evidence that the lines differ (MPE below
+90\%) is shaded grey (\code{ribbon}), the MPE for the difference at each point can be
+written on the plot (\code{ladder}), or plotted below (\code{spark}). Only one continuous
+variable is allowed in an interaction; if there are two, the function stops and
+returns a message.
+}
+\examples{
+\dontrun{
+bayes_mm_interact(bmm, interacts = "adcon:tv", bars = TRUE, violin = FALSE)
+# a continuous variable (age), split by two levels of adcon and tv
+bayes_mm_interact(bmm, interacts = "adcon:age:tv", ladder = TRUE, ribbon = FALSE)
+}
+}
+\seealso{
+\code{\link[=bayes_mm]{bayes_mm()}}, \code{\link[=bayes_mm_mainFX]{bayes_mm_mainFX()}}, \code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}}
 }

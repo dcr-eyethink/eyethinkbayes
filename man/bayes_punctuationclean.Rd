@@ -2,12 +2,27 @@
 % Please edit documentation in R/bayes_punctuationclean.R
 \name{bayes_punctuationclean}
 \alias{bayes_punctuationclean}
-\title{cleans dt of punctuation from levels and colnames specified in cvec, replacing with _
-or cvec itself if no dt}
+\title{Remove punctuation from column names and levels}
 \usage{
 bayes_punctuationclean(dt = NULL, cvec, subpat = "[[:punct:]|[:space:]]")
 }
-\description{
-cleans dt of punctuation from levels and colnames specified in cvec, replacing with _
-or cvec itself if no dt
+\arguments{
+\item{dt}{A data.table. If it is missing, then \code{cvec} is cleaned and returned.}
+
+\item{cvec}{The names of the columns to clean.}
+
+\item{subpat}{The pattern (a regular expression) to replace.}
 }
+\value{
+The cleaned data.table (with text columns turned into factors), or if
+\code{dt} is missing the cleaned \code{cvec}.
+}
+\description{
+Replaces punctuation and spaces with underscores, in the names of the
+conditions and the levels of any that are factors or text, which makes the
+models and plots simpler to work with. Used by \code{\link[=bayes_mm_run]{bayes_mm_run()}}.
+}
+\examples{
+eyethinkbayes:::bayes_punctuationclean(cvec = c("Ad condition", "tv-choice"))
+}
+\keyword{internal}

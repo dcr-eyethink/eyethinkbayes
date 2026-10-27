@@ -2,7 +2,7 @@
 % Please edit documentation in R/bayes_mm_mainFX.R
 \name{bayes_mm_mainFX}
 \alias{bayes_mm_mainFX}
-\title{output plot and means table for main effects. Can be passed plotting variables for pirateye}
+\title{Plot and report the main effects from a Bayesian mixed model}
 \usage{
 bayes_mm_mainFX(
   bmm,
@@ -15,18 +15,67 @@ bayes_mm_mainFX(
 )
 }
 \arguments{
-\item{bmm}{needs a bayes mixed model stanreg object (or a list with one at start)}
+\item{bmm}{A model from \code{\link[=bayes_mm_run]{bayes_mm_run()}} (or the list returned by
+\code{\link[=bayes_mm]{bayes_mm()}}).}
 
-\item{mainfxs}{vector of all main effect conditions to be plotted, defaults to all}
+\item{mainfxs}{A vector of the names of the conditions to plot. By default all
+of the main effects in the model are plotted.}
 
-\item{title}{additional text for the title}
+\item{title}{Extra text for the title of the plot (and the file name).}
 
-\item{contrast_sparkline}{show distribution of contrast estimate below plot}
+\item{contrast_sparkline}{Show the distribution of the contrast estimate below
+the plot?}
 
-\item{show_mpe}{report the mpes between pairs of mean estimates for the first names condition}
+\item{show_mpe}{Write the MPEs on the plot?}
 
-\item{show_preddist}{show distributions for the mean estimates}
+\item{show_preddist}{Show the posterior distributions of the means?}
+
+\item{...}{Further arguments for \code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}}, eg \code{bars = TRUE},
+\code{violin = FALSE}, \code{w} and \code{h} (the width and height of the saved pdf).}
+}
+\value{
+A list with \code{plot_mainfx}, the plot (a cowplot grid, so you can also
+draw it with \code{print()}), and \code{data_mainfx}, a list of the data behind it:
+\code{observed}, \code{predicted} (the posterior samples), \code{m} (the estimated means),
+\code{mpe} and \code{bcontrasts}.
 }
 \description{
-output plot and means table for main effects. Can be passed plotting variables for pirateye
+For each main effect (condition) in the model, prints a table of the
+estimated means and contrasts, and draws a plot showing the observed data and
+the posterior distributions of the estimated means. Any arguments of
+\code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}} can be passed in to change the plot.
+}
+\details{
+For conditions that are factors, the plot shows the observed data (violins),
+the estimated mean for each level, and the posterior distribution of each
+estimate (the smaller violins). When a condition has two levels, the MPE
+(maximum probability of effect, ie the probability that the difference between
+the two is not zero) is written between the two levels. The MPE is the \code{pd}
+(probability of direction) from the \code{modelbased} package.
+
+With \code{contrast_sparkline = TRUE}, the distribution of the difference between
+conditions is drawn underneath, with the central 95\% shaded in grey and zero
+marked by a black line. If the line is outside of the grey area, there is more
+than a 95\% probability that the difference is not zero.
+
+For conditions that are continuous variables, a separate plot shows the
+predicted line, with the MPE for the slope.
+
+The text output is printed to the console. (When the function is called by
+\code{\link[=bayes_mm]{bayes_mm()}} it is saved to a file.) Plots are saved as pdfs by
+\code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}}: to change where, pass \code{outp} in \code{...}
+(use \code{outp = ""} to not save them).
+
+For binomial models the means are on the probability scale.
+}
+\examples{
+\dontrun{
+mfx <- bayes_mm_mainFX(bmm, mainfxs = "adcon")
+mfx$plot_mainfx
+bayes_mm_mainFX(bmm, mainfxs = c("adcon", "tv"), bars = TRUE, violin = FALSE,
+                contrast_sparkline = TRUE, show_mpe = FALSE)
+}
+}
+\seealso{
+\code{\link[=bayes_mm]{bayes_mm()}}, \code{\link[=bayes_mm_interact]{bayes_mm_interact()}}, \code{\link[eyethinkdata:pirateye]{eyethinkdata::pirateye()}}
 }

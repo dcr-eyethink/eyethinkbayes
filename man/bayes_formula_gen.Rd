@@ -2,13 +2,29 @@
 % Please edit documentation in R/bayes_formula_gen.R
 \name{bayes_formula_gen}
 \alias{bayes_formula_gen}
-\title{combines terms into formula}
+\title{Make a model formula}
 \usage{
 bayes_formula_gen(dvname, conditions = NULL, groups, mmtype = "intercept")
 }
+\arguments{
+\item{dvname}{The name of the dependent variable.}
+
+\item{conditions}{The names of the conditions, which are crossed (\code{a * b}).}
+
+\item{groups}{The names of the grouping factors, each of which gets a random
+effect.}
+
+\item{mmtype}{"intercept" for random intercepts, "slopes" for random slopes by
+the conditions as well.}
+}
 \value{
-Returns bayes formulae
+The formula as text, eg "rating ~ adcon * tv + (1 | pid)".
 }
 \description{
-combines terms into formula
+Combines the names of the dv, the conditions and the grouping factors into a
+model formula, as text. Used by \code{\link[=bayes_mm_run]{bayes_mm_run()}}.
 }
+\examples{
+eyethinkbayes:::bayes_formula_gen("rating", c("adcon", "tv"), "pid")
+}
+\keyword{internal}

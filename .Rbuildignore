@@ -6,3 +6,10 @@
 ^\.github$
 ^doc$
 ^Meta$
+^analysis$
+^dev$
+^\.RData$
+^Rplots\.pdf$
+^README\.Rmd$
+^README_files$
+^vignettes/analysis$

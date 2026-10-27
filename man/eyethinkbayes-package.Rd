@@ -6,7 +6,7 @@
 \alias{eyethinkbayes-package}
 \title{eyethinkbayes: Bayesian analysis for eyethink lab data}
 \description{
-Runs bayesian mixed models, bayes ttests and some bayes factors. Outputs results to text files and plots
+Runs Bayesian mixed models, and reports and plots the main effects and interactions. Outputs results to text files and plots.
 }
 \seealso{
 Useful links:
@@ -15,6 +15,10 @@ Useful links:
   \item \url{https://dcr-eyethink.github.io/eyethinkbayes/}
   \item Report bugs at \url{https://github.com/dcr-eyethink/eyethinkbayes/issues}
 }
+
+}
+\author{
+\strong{Maintainer}: Daniel C. Richardson \email{dcr@eyethink.org} (\href{https://orcid.org/0000-0003-0039-9755}{ORCID})
 
 }
 \keyword{internal}

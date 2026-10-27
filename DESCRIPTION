@@ -1,13 +1,11 @@
 Package: eyethinkbayes
 Type: Package
 Title: Bayesian analysis for eyethink lab data
-Version: 0.2.2
-Author: person("Daniel","C." "Richardson",
-  email = "dcr@eyethink.org",
-  role = c("aut", "cre"),
-  comment = c(ORCID = "0000-0003-0039-9755"))
-Maintainer: DCR <dcr@eyethink.org>
-Description: Runs bayesian mixed models, bayes ttests and some bayes factors. Outputs results to text files and plots
+Version: 1.0.0
+Authors@R: person("Daniel C.", "Richardson", email = "dcr@eyethink.org",
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0003-0039-9755"))
+Description: Runs Bayesian mixed models, and reports and plots the main effects and interactions. Outputs results to text files and plots.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
@@ -15,21 +13,27 @@ Depends:
     eyethinkdata (>= 0.3.0)
 Remotes: 
     dcr-eyethink/eyethinkdata
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
 URL: https://github.com/dcr-eyethink/eyethinkbayes, https://dcr-eyethink.github.io/eyethinkbayes/
 BugReports: https://github.com/dcr-eyethink/eyethinkbayes/issues
 Imports: 
     bayestestR,
     coda,
+    cowplot,
     data.table,
+    emmeans,
     ggnewscale,
+    insight,
     modelbased,
     parameters,
+    psych,
     rstanarm,
     scales
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    shinystan
 VignetteBuilder: 
     knitr,
     rmarkdown

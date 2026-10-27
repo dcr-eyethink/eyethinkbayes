@@ -1,5 +1,17 @@
 
 bayes_contrastsparkline <- function(bcontrasts){
+  #' Plot the distribution of contrast estimates
+  #'
+  #' Draws a small plot, with a panel for each condition, of the posterior
+  #' distribution of the difference between conditions. The central 95% (the highest
+  #' density interval) is shaded and zero is marked with a vertical line. It is
+  #' designed to be put underneath a means plot. Used by [bayes_mm_mainFX()] and
+  #' [bayes_mm_interact()].
+  #'
+  #' @param bcontrasts A data.table with columns `cond` (the name of the condition)
+  #'   and `diff_est` (samples from the posterior distribution of the difference).
+  #' @return A ggplot.
+  #' @keywords internal
 
 conden <- bcontrasts[, with(density(diff_est),data.table(x,y)),by=cond]
 
