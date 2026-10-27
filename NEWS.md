@@ -24,3 +24,7 @@
 * Listed `marginaleffects`, `collapse` and `reformulas` in Suggests. Recent versions
   of `modelbased` and `insight` need them to estimate means, and without them
   the vignette (and the pkgdown site) could not be built.
+* The vignette is now pre-rendered (`vignettes/eyethinkbayes-vignette.Rmd.orig`
+  is the source). The models are no longer refitted when the package or the
+  pkgdown site is built, so a newer `modelbased` on the build machine cannot
+  break the build. The package code is unchanged.
