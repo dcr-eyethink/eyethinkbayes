@@ -31,7 +31,10 @@ Imports:
     rstanarm,
     scales
 Suggests: 
+    collapse,
     knitr,
+    marginaleffects,
+    reformulas,
     rmarkdown,
     shinystan
 VignetteBuilder: 

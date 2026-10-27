@@ -21,3 +21,6 @@
   error.
 * Declared the packages that were used but not listed as imports (`emmeans`,
   `insight`, `psych`, `cowplot`), and fixed the author field.
+* Listed `marginaleffects`, `collapse` and `reformulas` in Suggests. Recent versions
+  of `modelbased` and `insight` need them to estimate means, and without them
+  the vignette (and the pkgdown site) could not be built.
